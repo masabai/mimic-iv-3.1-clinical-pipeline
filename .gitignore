@@ -1,0 +1,4 @@
+C:/PythonProjects/data/*
+*.csv.gz
+*.db
+.env

@@ -1,0 +1,17 @@
+& "$env:USERPROFILE\AppData\Local\Programs\Python\Python313\python.exe" -m pip install physionet
+
+& C:\Users\moesa\AppData\Local\Programs\Python\Python313\python.exe -m pip install great-expectations psycopg2-binary SQLAlchemy
+
+& C:\Users\moesa\AppData\Local\Programs\Python\Python313\python.exe -m pip install duckdb
+
+& C:\Users\moesa\AppData\Local\Programs\Python\Python313\python.exe -m pip install duckdb-engine py -m pip install MEDS-extract
+
+& "C:\Users\moesa\AppData\Local\Programs\Python\Python313\python.exe" -m pip install MIMIC_IV_MEDS
+
+& "$env:USERPROFILE\AppData\Local\Programs\Ollama\ollama.exe" run qwen2.5-coder:7b
+
+& C:\Users\moesa\AppData\Local\Programs\Python\Python313\python.exe -m pip install prefect psycopg2-binary requests
+
+# instll any llm
+ollama run phi4 (to install) or ollama rm phi4  (to delete)
+
