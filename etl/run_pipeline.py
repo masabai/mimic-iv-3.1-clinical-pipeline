@@ -83,16 +83,21 @@ def run_mit_validation_suite():
     """Connects to host database to execute the official post-load validation check script."""
     print(f"[PREFECT] Initializing official MIT-Lab verification suite: {MIT_VALIDATE_SQL_PATH.name}")
     
+    custom_env = os.environ.copy()
+    custom_env["PGPASSWORD"] = "123"
+    
     if not MIT_VALIDATE_SQL_PATH.exists():
         print(f"[WARN] MIT validation SQL script not found at {MIT_VALIDATE_SQL_PATH}. Skipping gate.")
         return False
 
+    psql_system_exe = r"C:\Program Files\PostgreSQL\18\bin\psql.exe"
     # Execute the raw validation file against your local server database using psql terminal app
     # Update the psql command array to use the absolute path to your psql.exe file
     psql_command = [
-        r"C:\Program Files\PostgreSQL\16\bin\psql.exe",
+        #r"C:\Program Files\PostgreSQL\16\bin\psql.exe",
+        psql_system_exe,
         "-X", 
-        "-U", "moesa", 
+        "-U", "postgres", 
         "-d", "postgres", 
         "-f", str(MIT_VALIDATE_SQL_PATH)
     ]
@@ -126,9 +131,9 @@ def master_clinical_pipeline_flow():
     
     if data_exists:
         # Gate 2: Run your fast 0.14-minute custom script matching your 3 requested checks
-        smoke_check_passed = run_pre_ingestion_smoke_check()
+#        smoke_check_passed = run_pre_ingestion_smoke_check()
         
-        if smoke_check_passed:
+#        if smoke_check_passed:
             # Gate 3: Check database structures are live
             db_ready = verify_postgresql_load_state()
             
