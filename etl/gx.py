@@ -142,7 +142,7 @@ def verify_column_headers():
         json.dump(schema_catalog, f, indent=2)
     print(f"[PASS] Complete column catalog layout saved cleanly to: {output_log.name}")
 
-
+"""
 if __name__ == "__main__":
     start_time = time.time()
     try:
@@ -157,3 +157,26 @@ if __name__ == "__main__":
         print("==================================================================")
     except Exception as err:
         print(f"\n[PIPELINE TERMINATED] Ingestion halted by smoke validation check:\n{err}")
+"""
+import sys  # <--- ADD THIS IMPORT AT THE TOP OR INSIDE THE MAIN BLOCK
+import time
+
+if __name__ == "__main__":
+    start_time = time.time()
+    try:
+        verify_file_counts()          # Check 1: Volumetric File Count Gates
+        verify_cryptographic_hashes()  # Check 2: File Content Integrity Checksum
+        verify_column_headers()        # Check 3: Extract Column Names & Counts
+        
+        runtime = (time.time() - start_time) / 60
+        print("\n==================================================================")
+        print(f"[SUCCESS] PRE-INGESTION GATES PASSED IN {runtime:.2f} MINUTES")
+        print("Ready for PostgreSQL Bulk Load step.")
+        print("==================================================================")
+        
+        sys.exit(0)  # <--- EXPLICITLY RETURN STATUS 0 (SUCCESS)
+        
+    except Exception as err:
+        print(f"\n[PIPELINE TERMINATED] Ingestion halted by smoke validation check:\n{err}")
+        
+        sys.exit(1)  # <--- EXPLICITLY RETURN STATUS 1 (FAILURE) TO PREFECT
