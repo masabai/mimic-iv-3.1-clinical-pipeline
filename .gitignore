@@ -6,6 +6,7 @@ C:/PythonProjects/data/*
 data/
 archived/
 validation/
+misc/
 
 # Explicitly catches any compressed clinical tables or local test databases
 *.csv.gz
