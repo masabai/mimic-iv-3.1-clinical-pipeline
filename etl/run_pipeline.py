@@ -83,18 +83,20 @@ def run_mit_validation_suite():
     """Connects to host database to execute the official post-load validation check script."""
     print(f"[PREFECT] Initializing official MIT-Lab verification suite: {MIT_VALIDATE_SQL_PATH.name}")
     
-    custom_env = os.environ.copy()
-    custom_env["PGPASSWORD"] = "123"
+    #custom_env = os.environ.copy()
+    #custom_env["PGPASSWORD"] = "XXXX"
     
     if not MIT_VALIDATE_SQL_PATH.exists():
         print(f"[WARN] MIT validation SQL script not found at {MIT_VALIDATE_SQL_PATH}. Skipping gate.")
         return False
 
-    psql_system_exe = r"C:\Program Files\PostgreSQL\18\bin\psql.exe"
+   
     # Execute the raw validation file against your local server database using psql terminal app
     # Update the psql command array to use the absolute path to your psql.exe file
+    psql_system_exe = r"C:\Program Files\PostgreSQL\18\bin\psql.exe"
+    #command_string = f'"{psql_system_exe}" -X -U postgres -d postgres -f "{MIT_VALIDATE_SQL_PATH}"'
+    
     psql_command = [
-        #r"C:\Program Files\PostgreSQL\16\bin\psql.exe",
         psql_system_exe,
         "-X", 
         "-U", "postgres", 
@@ -103,8 +105,15 @@ def run_mit_validation_suite():
     ]
     
     # Add shell=True to the execution line
-        # Pass the command as a single raw string to let the Windows shell parse the paths flawlessly
-    result = subprocess.run(f'"{psql_command[0]}" -X -U moesa -d postgres -f "{MIT_VALIDATE_SQL_PATH}"', capture_output=True, text=True, shell=True)
+    # Pass the command as a single raw string to let the Windows shell parse the paths flawlessly
+        # Format the command to declare the variable directly inside the active Windows shell execution string
+    # Replace 'XXXX' with your actual master database password string
+    command_string = f'set PGPASSWORD=123&& "{psql_system_exe}" -X -U postgres -d postgres -f "{MIT_VALIDATE_SQL_PATH}"'
+    
+    # Run the unified string command cleanly inside the background shell
+    result = subprocess.run(command_string, capture_output=True, text=True, shell=True)
+
+    #result = subprocess.run(f'"{psql_command[0]}" -X -U postgres -d postgres -f "{MIT_VALIDATE_SQL_PATH}"', capture_output=True, text=True, shell=True)
 
     if result.returncode != 0:
         print(f"[WARN] MIT verification query reported an anomaly:\n{result.stderr}")
@@ -131,9 +140,9 @@ def master_clinical_pipeline_flow():
     
     if data_exists:
         # Gate 2: Run your fast 0.14-minute custom script matching your 3 requested checks
-#        smoke_check_passed = run_pre_ingestion_smoke_check()
+        smoke_check_passed = run_pre_ingestion_smoke_check()
         
-#        if smoke_check_passed:
+        if smoke_check_passed:
             # Gate 3: Check database structures are live
             db_ready = verify_postgresql_load_state()
             
@@ -147,5 +156,19 @@ def master_clinical_pipeline_flow():
 
 
 if __name__ == "__main__":
-    # Wake up the local Prefect orchestration core engine
-    master_clinical_pipeline_flow()
+    # Record the baseline start timestamp 
+    pipeline_start_time = time.time()
+    
+    try:
+        # Fire up the automated local Prefect runtime engine
+        master_clinical_pipeline_flow()
+        
+        # Calculate overall delta duration in minutes
+        total_duration_minutes = (time.time() - pipeline_start_time) / 60
+        
+        print("\n==================================================================")
+        print(f"[METRICS] PIPELINE WORKFLOW RUN COMPLETED IN: {total_duration_minutes:.2f} MINUTES")
+        print("==================================================================")
+        
+    except Exception as err:
+        print(f"\n[ORCHESTRATION BREACH] Automation flow terminated unexpectedly:\n{err}")
