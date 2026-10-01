@@ -1,0 +1,28 @@
+# ==============================================================================
+# CONFIGURATION — DBT CORE DATA WAREHOUSE SOURCE SCHEMA SOURCE REFERENCES
+# ==============================================================================
+version: 2
+
+sources:
+  - name: mimic_raw
+    database: mimiciv            # The primary warehouse database instance name
+    schema: public               # The exact schema where your raw MIT data rests
+    
+    tables:
+      - name: admissions
+        description: "Patient hospitalizations tracking high-level timeline metrics."
+        columns:
+          - name: hadm_id
+            description: "Unique surrogate key identifier for each distinct patient admission."
+            
+      - name: patients
+        description: "Demographic registries containing centralized anchor metrics."
+        columns:
+          - name: subject_id
+            description: "The primary operational anchor key linking all clinical events."
+            
+      - name: icustays
+        description: "Intensive care unit stays mapping bed-level boundary tracking parameters."
+        columns:
+          - name: stay_id
+            description: "Surrogate key pinpointing specific ICU ward residence timelines."

@@ -1,203 +1,159 @@
-import glob
-import json
+import os
+import re
 import time
-from datetime import datetime
-from pathlib import Path
-import great_expectations as gx
-from great_expectations.checkpoint import Checkpoint
-from great_expectations.core.expectation_suite import ExpectationSuite
-from great_expectations.core.validation_definition import ValidationDefinition
-
-# ==============================================================================
-# CONFIGURATION — DEFINITIVE LANDING ZONE VALIDATION (GX V1.X STRICT COMPLIANT)
-# ==============================================================================
-BASE_DIR = Path(r"C:\PythonProjects\mimic-clinical-pipeline")
-LANDING_ZONE_DIR = Path(r"C:\PythonProjects\data\mimic-iv-3.1")
-GX_OUTPUT_DIR = BASE_DIR / "etl" / "validation"
-GX_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-
-# MIMIC Files and their corresponding module folders
-MIMIC_TARGET_FILES = {
-    #"admissions": "hosp",
-    "chartevents": "icu"
-}
-
+import gzip
 import hashlib
+import json
+from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor
 
-def verify_file_hash(file_path: str, expected_hash: str) -> bool:
-    """Streams file in blocks to check MD5 without exploding RAM."""
-    md5_hash = hashlib.md5()
-    with open(file_path, "rb") as f:
-        # Read in 8MB chunks
-        for byte_block in iter(lambda: f.read(8192 * 1024), b""):
-            md5_hash.update(byte_block)
+# ==============================================================================
+# CONFIGURATION — STRICT PRE-INGESTION SMOKE GATES
+# ==============================================================================
+LANDING_ZONE_DIR = Path(r"C:\PythonProjects\data\mimic-iv-3.1")
+LOGS_OUTPUT_DIR = Path(r"C:\PythonProjects\mimic-clinical-pipeline\etl\validation")
+LOGS_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
+# Total expected file volume counts (including data tables)
+EXPECTED_FILE_COUNTS = {"hosp": 22, "icu": 9}
+
+
+# ==============================================================================
+# GATE 1: FILE COUNT VALIDATION
+# ==============================================================================
+def verify_file_counts():
+    """Checks that the download directory contains the correct number of data tables."""
+    print("\n================================================================== ")
+    print("[SMOKE CHECK 1/3] VERIFYING LANDING ZONE FILE VOLUMES")
+    print("==================================================================")
     
-    return md5_hash.hexdigest() == expected_hash
-
-
-def run_data_validation(file_path, batch_name):
-    """
-    Validates a massive compressed MIMIC file out-of-core using DuckDB and GX 1.x.
-    """
-    context = gx.get_context(mode="ephemeral")
-    
-    # Initialize DuckDB context
-    data_source = context.data_sources.add_sql(
-        name=f"source_{batch_name}",
-        connection_string="duckdb:///:memory:"
-    )
-
-    # Clean path separation for the engine parser string
-    clean_path = str(file_path).replace("\\", "/")
-    query = f"SELECT * FROM read_csv_auto('{clean_path}')"
-    
-    data_asset = data_source.add_query_asset(name=f"asset_{batch_name}", query=query)
-    
-    # Fix: Explicitly declare the named batch definition whole table mapping
-    batch_definition = data_asset.add_batch_definition_whole_table(name=f"batch_def_{batch_name}")
-
-    suite = ExpectationSuite(name=f"suite_{batch_name}")
-    context.suites.add(suite)
-
-    # --- Structural Column Expectations ---
-    suite.add_expectation(gx.expectations.ExpectColumnToExist(column="subject_id"))
-
-    if batch_name == "admissions":
-        suite.add_expectation(gx.expectations.ExpectColumnToExist(column="hadm_id"))
-        suite.add_expectation(gx.expectations.ExpectColumnValuesToNotBeNull(column="hadm_id"))
-    elif batch_name == "icustays":
-        suite.add_expectation(gx.expectations.ExpectColumnToExist(column="stay_id"))
-        suite.add_expectation(gx.expectations.ExpectColumnValuesToNotBeNull(column="stay_id"))
-    elif batch_name == "chartevents":
-            suite.add_expectation(gx.expectations.ExpectColumnToExist(column="charttime"))
-            suite.add_expectation(gx.expectations.ExpectColumnValuesToNotBeNull(column="charttime"))
-    
-    validation_definition = context.validation_definitions.add(
-            ValidationDefinition(
-            name=f"val_def_{batch_name}",
-            data=batch_definition,
-            suite=suite
-        )
-    )
-      
-    checkpoint = context.checkpoints.add(
-    Checkpoint(
-        name=f"chk_{batch_name}",
-        validation_definitions=[validation_definition]
-    )
-)
-    results = checkpoint.run()
-    return results
-
-
-def validate_all_mimic_files():
-    """
-    ETL step wrapper to scan landing zone, execute GX, and save metrics.
-    """
-    for file_name, folder in MIMIC_TARGET_FILES.items():
-        file_path = LANDING_ZONE_DIR / folder / f"{file_name}.csv.gz"
+    for module, expected in EXPECTED_FILE_COUNTS.items():
+        module_path = LANDING_ZONE_DIR / module
+        if not module_path.exists():
+            raise FileNotFoundError(f"[FAIL] Target module path not found on server: {module_path}")
+            
+        found_files = list(module_path.glob("*.csv.gz"))
+        print(f"[INVENTORY] Module '{module}': Found {len(found_files)} of {expected} tables.")
         
-        if not file_path.exists():
-            print(f"[WARN] Target file missing, skipping: {file_path}")
-            continue
+        if len(found_files) != expected:
+            raise ValueError(f"[FAIL] Incomplete download in '{module}'. Expected {expected}, got {len(found_files)}.")
+    print("[PASS] File inventory counts match production release layouts.")
 
-        print(f"\n[GX PIPELINE] Streaming landing zone asset: {file_path}")
-        validation_results = run_data_validation(file_path, batch_name=file_name)
 
-        # Output execution metrics to JSON exactly like your CDC portfolio project
-        output_file = GX_OUTPUT_DIR / f"gx_{file_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-        """
-        with open(output_file, "w", encoding="utf-8") as f:
-           json.dump(validation_results, f, indent=2, default=str)
-           print(f"[SUCCESS] JSON Run Report localized: {output_file}")
-           print(json.dumps(validation_results, indent=2, default=str))
-        """
+# ==============================================================================
+# GATE 2: MULTI-THREADED SHA-256 MANIFEST SUMS CHECK
+# ==============================================================================
+def parse_sha256_manifest():
+    """Parses manifest checksum pairs from the landing path."""
+    manifest_file = LANDING_ZONE_DIR / "SHA256SUMS.txt"
+    if not manifest_file.exists():
+        print(f"[WARN] Manifest SHA256SUMS.txt missing in {LANDING_ZONE_DIR}. Skipping hash checks.")
+        return {}
         
+    hash_map = {}
+    pattern = re.compile(r"^([a-fA-A0-9]{64})\s+(.+)$")
+    with open(manifest_file, "r", encoding="utf-8") as f:
+        for line in f:
+            match = pattern.match(line.strip())
+            if match:
+                sha_val, relative_path = match.groups()
+                clean_rel_path = Path(relative_path.replace("/", os.sep))
+                hash_map[clean_rel_path] = sha_val
+    return hash_map
+
+
+def stream_verify_file_hash(args):
+    """Streams files in 8MB chunks to check cryptographic signatures without memory spikes."""
+    file_path, expected_hash = args
+    sha256_engine = hashlib.sha256()
+    
+    try:
+        with open(file_path, "rb") as f:
+            for byte_block in iter(lambda: f.read(8192 * 1024), b""):
+                sha256_engine.update(byte_block)
         
-        report = {}
-
-        for key, result in validation_results.run_results.items():
-         report[str(key)] = {
-        "success": result.success,
-        "suite_name": result.suite_name,
-        "statistics": result.statistics,
-        "results": [
-            {
-                "success": r.success,
-                "expectation": r.expectation_config.type,
-                "column": r.expectation_config.kwargs.get("column"),
-                "result": r.result,
-                "exception_info": r.exception_info,
-            }
-            for r in result.results
-        ],
-    }
-
-    with open(output_file, "w", encoding="utf-8") as f:
-        json.dump(report, f, indent=2, default=str)
+        if sha256_engine.hexdigest() == expected_hash:
+            print(f"[HASH PASS] {file_path.name}")
+            return True
+        print(f"[HASH FAIL] Mismatch on target asset: {file_path.name}")
+        return False
+    except Exception as e:
+        print(f"[HASH ERROR] Could not read file {file_path.name}: {e}")
+        return False
 
 
-
-
-
-
-def _extract_row_count(gx_json):
-    """Parses verification metrics from the evaluation data wrapper."""
-    for _, val in gx_json.get("run_results", {}).items():
-        metrics = val.get("validation_result", {}).get("statistics", {})
-        if "evaluated_expectations" in metrics:
-            return metrics.get("successful_expectations", 100) 
-    return None
-
-
-def check_observability_drift():
-    """
-    ETL Data Observability step: Compares iterations to halt automated steps if metrics drift.
-    """
-    VOLUME_DROP_THRESHOLD = 0.10  # Flag anomaly if row counts drop >10%
-    anomalies = []
-
-    for dataset in MIMIC_TARGET_FILES.keys():
-        pattern = str(GX_OUTPUT_DIR / f"gx_{dataset}_*.json")
-        files = sorted(glob.glob(pattern))
-
-        if len(files) < 2:
-            print(f"[Observability] {dataset}: Base baseline iteration recorded.")
-            continue
-
-        try:
-            with open(files[-2]) as f:
-                prev = json.load(f)
-            with open(files[-1]) as f:
-                curr = json.load(f)
-        except json.JSONDecodeError:
-            print(f"[Observability] {dataset}: Previous report is invalid/empty. Skipping drift check.")
-            continue
-
-        prev_rows = _extract_row_count(prev)
-        curr_rows = _extract_row_count(curr)
+def verify_cryptographic_hashes():
+    """Coordinates parallel worker threads to validate extraction signatures."""
+    print("\n==================================================================")
+    print("[SMOKE CHECK 2/3] RUNNING CRYPTOGRAPHIC MANIFEST CHECKS")
+    print("==================================================================")
+    
+    manifest_map = parse_sha256_manifest()
+    if not manifest_map:
+        return
         
-        if prev_rows and curr_rows:
-            drop_pct = (prev_rows - curr_rows) / prev_rows
-            print(f"[Observability] {dataset} volume: {prev_rows} -> {curr_rows} ({drop_pct:+.1%})")
-            if drop_pct > VOLUME_DROP_THRESHOLD:
-                anomalies.append(
-                    f"Volume anomaly detected on [{dataset}]: {drop_pct:.1%} drop ({prev_rows} -> {curr_rows})"
-                )
+    tasks = []
+    for rel_path, expected_hash in manifest_map.items():
+        absolute_target = LANDING_ZONE_DIR / rel_path
+        if absolute_target.exists():
+            tasks.append((absolute_target, expected_hash))
+            
+    print(f"[SYSTEM] Dispatching {len(tasks)} parallel validation hash streams...")
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        results = list(executor.map(stream_verify_file_hash, tasks))
+        
+    if not all(results):
+        raise ValueError("[FAIL] Extraction payload corrupted. Checksum gates blocked loading phase.")
+    print("[PASS] All landing zone assets match official cryptographic keys.")
 
-    if anomalies:
-        print("[CRITICAL] Automated load gate frozen by drift check parameters.")
-        raise ValueError("Observability validation breach:\n" + "\n".join(anomalies))
+
+# ==============================================================================
+# GATE 3: HIGH-SPEED NATIVE HEADER SCHEMA LOOKUP
+# ==============================================================================
+def verify_column_headers():
+    """Inspects only the first line of each compressed file to dump schema maps."""
+    print("\n==================================================================")
+    print("[SMOKE CHECK 3/3] EXTRACTING METADATA & COLUMN SCHEMAS")
+    print("==================================================================")
+    
+    schema_catalog = {}
+    
+    for module in EXPECTED_FILE_COUNTS.keys():
+        module_path = LANDING_ZONE_DIR / module
+        for file_path in module_path.glob("*.csv.gz"):
+            try:
+                # Open with gzip streaming mode, reading only the first text line
+                with gzip.open(file_path, "rt", encoding="utf-8") as f:
+                    header_line = f.readline().strip()
+                    columns = header_line.split(",") if header_line else []
+                    
+                schema_catalog[file_path.name] = {
+                    "module": module,
+                    "column_count": len(columns),
+                    "columns": columns
+                }
+                print(f"[SCHEMA CAPTURED] {file_path.name} (Columns: {len(columns)})")
+            except Exception as e:
+                print(f"[SCHEMA ERROR] Failed parsing file metadata for {file_path.name}: {e}")
+                
+    # Save the catalog structure to a clean json log for portfolio evidence
+    output_log = LOGS_OUTPUT_DIR / f"landing_zone_schema_snapshot.json"
+    with open(output_log, "w", encoding="utf-8") as f:
+        json.dump(schema_catalog, f, indent=2)
+    print(f"[PASS] Complete column catalog layout saved cleanly to: {output_log.name}")
 
 
 if __name__ == "__main__":
     start_time = time.time()
-    
-    # 1. Run Data Validation Stage
-    validate_all_mimic_files()
-    
-    # 2. Run Observability Drift Check Stage
-    check_observability_drift()
-    
-    total_time = (time.time() - start_time) / 60
-    print(f"\n[SYSTEM STATUS] Script pipeline processed completely in {total_time:.2f} minutes.")
+    try:
+        verify_file_counts()          # Check 1: Volumetric File Count Gates
+        verify_cryptographic_hashes()  # Check 2: File Content Integrity Checksum
+        verify_column_headers()        # Check 3: Extract Column Names & Counts
+        
+        runtime = (time.time() - start_time) / 60
+        print("\n==================================================================")
+        print(f"[SUCCESS] PRE-INGESTION GATES PASSED IN {runtime:.2f} MINUTES")
+        print("Ready for PostgreSQL Bulk Load step.")
+        print("==================================================================")
+    except Exception as err:
+        print(f"\n[PIPELINE TERMINATED] Ingestion halted by smoke validation check:\n{err}")

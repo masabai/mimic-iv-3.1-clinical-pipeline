@@ -1,4 +1,33 @@
+# ==============================================================================
+# LOCAL DATA & INGESTION (PII SECURITY BOUNDARIES)
+# ==============================================================================
+# Blocks the massive raw dataset from accidentally uploading to GitHub
 C:/PythonProjects/data/*
+data/
+archived/
+validation/
+
+# Explicitly catches any compressed clinical tables or local test databases
 *.csv.gz
 *.db
+
+# ==============================================================================
+# SYSTEM CREDENTIALS & SECURITY ENVIRONMENTS
+# ==============================================================================
+# Protects local database passwords and PhysioNet connection tokens
 .env
+
+# Protects database usernames, passwords, and server details within your dbt workspace
+dbt_project/profiles.yml
+
+# ==============================================================================
+# dbt CORE RUNTIME ARTIFACTS & COMPILATION CACHES
+# ==============================================================================
+# Automated run metrics and compiled raw SQL query files generated on execution
+dbt_project/target/
+
+# Local debugging log registries generated during 'dbt run' or 'dbt test'
+dbt_project/logs/
+
+# Third-party code packages downloaded from the dbt Hub (managed via 'dbt deps')
+dbt_project/dbt_packages/

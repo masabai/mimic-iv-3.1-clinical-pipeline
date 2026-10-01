@@ -5,14 +5,17 @@ import time
 from datetime import datetime
 from pathlib import Path
 
+# ARCHIVED --- LOAD OK , TRANSFORMATION PART NOT NEEDED
+ 
+
 def run_resilient_ingestion():
     output_dir = Path(r"C:\mimiciv_raw")
     
     python_scripts_path = Path(sys.executable).parent / "Scripts"
     executable_engine = python_scripts_path / "meds-extract-run.exe"
     
-    os.environ["DATASET_DOWNLOAD_USERNAME"] = "maye2026"
-    os.environ["DATASET_DOWNLOAD_PASSWORD"] = "21Mar1968"
+    os.environ["DATASET_DOWNLOAD_USERNAME"] = "xxxxxx"
+    os.environ["DATASET_DOWNLOAD_PASSWORD"] = "xxxxxx"
     os.environ["PHYSIONET_USER"] = "your_real_username"
     os.environ["PHYSIONET_PASSWORD"] = "your_real_password"
     
