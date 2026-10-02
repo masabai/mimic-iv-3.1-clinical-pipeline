@@ -11,7 +11,9 @@ SET CLIENT_ENCODING TO 'utf8';
 
 -- hosp schema
 \cd hosp
-\COPY mimiciv_hosp.d_labitems FROM PROGRAM 'gzip -dc d_labitems.csv.gz' DELIMITER ',' CSV HEADER NULL '';
+--\COPY mimiciv_hosp.d_labitems FROM PROGRAM 'gzip -dc d_labitems.csv.gz' DELIMITER ',' CSV HEADER NULL '';
+-- SWAPPED 'gzip -dc' FOR WINDOWS NATIVE 'tar -f'
+\COPY mimiciv_hosp.admissions FROM PROGRAM 'tar -f admissions.csv.gz -xzO' DELIMITER ',' CSV HEADER NULL '';
 
 /*
 \COPY mimiciv_hosp.admissions FROM PROGRAM 'gzip -dc admissions.csv.gz' DELIMITER ',' CSV HEADER NULL '';
