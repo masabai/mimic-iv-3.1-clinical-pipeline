@@ -31,3 +31,9 @@ dbt_project/logs/
 
 # Third-party code packages downloaded from the dbt Hub (managed via 'dbt deps')
 dbt_project/dbt_packages/
+
+# ==============================================================================
+# MISC files
+# ==============================================================================
+
+etl/mimic-clinical-pipeline.code-workspace

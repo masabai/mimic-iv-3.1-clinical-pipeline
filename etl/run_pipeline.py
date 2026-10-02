@@ -1,18 +1,17 @@
-import os
 import subprocess
 import time
 from pathlib import Path
 from prefect import flow, task
 
 # ==============================================================================
-# CONFIGURATION — PIPELINE ORCHESTRATION PROFILE
+# CONFIGURATION — PIPELINE ORCHESTRATION
 # ==============================================================================
 
 LOCAL_DOWNLOAD_DIR = Path(r"C:\PythonProjects\data")
 PROJECT_ROOT = Path(r"C:\PythonProjects\mimic-clinical-pipeline")
 MIT_BUILD_SQL_PATH = Path(r"C:\PythonProjects\mimic-clinical-pipeline\etl\build\validate.sql")
 
-# Target execution aliases mapped to your server environment paths
+# Target execution aliases mapped to server environment paths
 DBT_EXE = r"C:\Users\moesa\AppData\Local\Programs\Python\Python313\Scripts\dbt.exe"
 PYTHON_EXE = r"C:\Users\moesa\AppData\Local\Programs\Python\Python313\python.exe"
 
@@ -21,7 +20,7 @@ PYTHON_EXE = r"C:\Users\moesa\AppData\Local\Programs\Python\Python313\python.exe
 # PIPELINE AUTOMATED TASKS
 # ==============================================================================
 
-@task(name="Step 1: Check Landing Zone Status")
+@task(name="Step 1: Check target directories")
 def check_ingestion():
     """Idempotency Rule: Skips extraction phases if target directories exist."""
 

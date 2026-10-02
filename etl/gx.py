@@ -1,4 +1,5 @@
 import os
+import sys
 import re
 import time
 import gzip
@@ -19,7 +20,7 @@ EXPECTED_FILE_COUNTS = {"hosp": 22, "icu": 9}
 
 
 # ==============================================================================
-# GATE 1: FILE COUNT VALIDATION
+# 1: FILE COUNT VALIDATION
 # ==============================================================================
 def verify_file_counts():
     """Checks that the download directory contains the correct number of data tables."""
@@ -41,7 +42,7 @@ def verify_file_counts():
 
 
 # ==============================================================================
-# GATE 2: MULTI-THREADED SHA-256 MANIFEST SUMS CHECK
+# 2: MULTI-THREADED SHA-256 MANIFEST SUMS CHECK
 # ==============================================================================
 def parse_sha256_manifest():
     """Parses manifest checksum pairs from the landing path."""
@@ -108,7 +109,7 @@ def verify_cryptographic_hashes():
 
 
 # ==============================================================================
-# GATE 3: HIGH-SPEED NATIVE HEADER SCHEMA LOOKUP
+# 3: HEADER SCHEMA LOOKUP
 # ==============================================================================
 def verify_column_headers():
     """Inspects only the first line of each compressed file to dump schema maps."""
@@ -142,41 +143,22 @@ def verify_column_headers():
         json.dump(schema_catalog, f, indent=2)
     print(f"[PASS] Complete column catalog layout saved cleanly to: {output_log.name}")
 
-"""
 if __name__ == "__main__":
     start_time = time.time()
     try:
-        verify_file_counts()          # Check 1: Volumetric File Count Gates
-        verify_cryptographic_hashes()  # Check 2: File Content Integrity Checksum
+        verify_file_counts()          # Check 1: Volumetric File Count 
+        verify_cryptographic_hashes()  # Check 2: File Content hash check
         verify_column_headers()        # Check 3: Extract Column Names & Counts
         
         runtime = (time.time() - start_time) / 60
         print("\n==================================================================")
-        print(f"[SUCCESS] PRE-INGESTION GATES PASSED IN {runtime:.2f} MINUTES")
-        print("Ready for PostgreSQL Bulk Load step.")
-        print("==================================================================")
-    except Exception as err:
-        print(f"\n[PIPELINE TERMINATED] Ingestion halted by smoke validation check:\n{err}")
-"""
-import sys  # <--- ADD THIS IMPORT AT THE TOP OR INSIDE THE MAIN BLOCK
-import time
-
-if __name__ == "__main__":
-    start_time = time.time()
-    try:
-        verify_file_counts()          # Check 1: Volumetric File Count Gates
-        verify_cryptographic_hashes()  # Check 2: File Content Integrity Checksum
-        verify_column_headers()        # Check 3: Extract Column Names & Counts
-        
-        runtime = (time.time() - start_time) / 60
-        print("\n==================================================================")
-        print(f"[SUCCESS] PRE-INGESTION GATES PASSED IN {runtime:.2f} MINUTES")
-        print("Ready for PostgreSQL Bulk Load step.")
+        print(f"[SUCCESS] PRE-INGESTION CHECKS PASSED IN {runtime:.2f} MINUTES")
+        print("Ready for PostgreSQL Load step.")
         print("==================================================================")
         
-        sys.exit(0)  # <--- EXPLICITLY RETURN STATUS 0 (SUCCESS)
+        sys.exit(0)  # <--- EXPLICITLY RETURN STATUS 0 (SUCCESS) TO PREFECT (for next step)
         
     except Exception as err:
         print(f"\n[PIPELINE TERMINATED] Ingestion halted by smoke validation check:\n{err}")
         
-        sys.exit(1)  # <--- EXPLICITLY RETURN STATUS 1 (FAILURE) TO PREFECT
+        sys.exit(1)  # <--- EXPLICITLY RETURN STATUS 1 (FAILURE) TO PREFECT (for next step)
