@@ -9,7 +9,7 @@ from prefect import flow, task
 
 LOCAL_DOWNLOAD_DIR = Path(r"C:\PythonProjects\data")
 PROJECT_ROOT = Path(r"C:\PythonProjects\mimic-clinical-pipeline")
-MIT_BUILD_SQL_PATH = Path(r"C:\PythonProjects\mimic-clinical-pipeline\etl\build\validate.sql")
+MIT_BUILD_SQL_PATH = Path(r"C:\PythonProjects\mimic-clinical-pipeline\mimic-mit-build\validate.sql")
 
 # Target execution aliases mapped to server environment paths
 DBT_EXE = r"C:\Users\moesa\AppData\Local\Programs\Python\Python313\Scripts\dbt.exe"
