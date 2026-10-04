@@ -5,10 +5,10 @@ import time
 # ==============================================================================
 # CONFIGURATIONS (FULL MIMIC-IV v3.1 CREDENTIALED EXTRACT VIA NATIVE WGET)
 # ==============================================================================
-PHYSIONET_USER = "maye2026"            # Verified username from your screen
-PHYSIONET_PASS = "xxxx"       # <-- Replace with your real password
+PHYSIONET_USER = "maye2026"   
+PHYSIONET_PASS = "xxxx"       
 
-# Target output directory on your laptop matching your .gitignore rules
+# Target output directory
 LOCAL_DOWNLOAD_DIR = r"C:\PythonProjects\data"
 os.makedirs(LOCAL_DOWNLOAD_DIR, exist_ok=True)
 
@@ -21,7 +21,7 @@ def run_wget_extract():
     
     start_time = time.time()
     
-    # Official absolute URL tree from your browser screen
+    # Official absolute URL tree
     target_url = "https://physionet.org/files/mimiciv/3.1/"
     
     # Constructing the exact parameters from the PhysioNet documentation

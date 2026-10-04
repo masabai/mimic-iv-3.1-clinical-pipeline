@@ -1,13 +1,12 @@
-# ==============================================================================
-# CONFIGURATION — DBT CORE DATA WAREHOUSE SOURCE SCHEMA SOURCE REFERENCES
-# ==============================================================================
 version: 2
 
 sources:
-  - name: mimic_raw
-    database: mimiciv            # The primary warehouse database instance name
-    schema: public               # The exact schema where your raw MIT data rests
-    
+  # --------------------------------------------------------------------------
+  # HOSPITAL MODULE SOURCE TARGETS
+  # --------------------------------------------------------------------------
+  - name: mimic_raw_hosp
+    database: mimiciv_testing
+    schema: mimiciv_hosp
     tables:
       - name: admissions
         description: "Patient hospitalizations tracking high-level timeline metrics."
@@ -20,7 +19,14 @@ sources:
         columns:
           - name: subject_id
             description: "The primary operational anchor key linking all clinical events."
-            
+
+  # --------------------------------------------------------------------------
+  # INTENSIVE CARE UNIT MODULE SOURCE TARGETS
+  # --------------------------------------------------------------------------
+  - name: mimic_raw_icu
+    database: mimiciv_testing
+    schema: mimiciv_icu  # <--- CRITICAL FIX: Directs dbt to the right schema on your server
+    tables:
       - name: icustays
         description: "Intensive care unit stays mapping bed-level boundary tracking parameters."
         columns:
