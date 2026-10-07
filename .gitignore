@@ -1,39 +1,27 @@
-# ==============================================================================
-# LOCAL DATA & INGESTION (PII SECURITY BOUNDARIES)
-# ==============================================================================
-# Blocks the massive raw dataset from accidentally uploading to GitHub
-C:/PythonProjects/data/*
-**/archived/
-**/validation/
-**/misc/
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
 
-# Explicitly catches any compressed clinical tables or local test databases
-*.csv.gz
-*.db
-
-# ==============================================================================
-# SYSTEM CREDENTIALS & SECURITY ENVIRONMENTS
-# ==============================================================================
-# Protects local database passwords and PhysioNet connection tokens
-.env
-
-# Protects database usernames, passwords, and server details within your dbt workspace
+# dbt
+dbt_project/target/
+dbt_project/logs/
+dbt_project/dbt_packages/
+dbt_project/.user.yml
 dbt_project/profiles.yml
 
-# ==============================================================================
-# dbt CORE RUNTIME ARTIFACTS & COMPILATION CACHES
-# ==============================================================================
-# Automated run metrics and compiled raw SQL query files generated on execution
-dbt_project/target/
+# Environment / secrets
+.env
+.env.*
 
-# Local debugging log registries generated during 'dbt run' or 'dbt test'
-dbt_project/logs/
+# IDE
+.vscode/
+.idea/
+archived/
+docs/*
 
-# Third-party code packages downloaded from the dbt Hub (managed via 'dbt deps')
-dbt_project/dbt_packages/
+# OS
+.DS_Store
+Thumbs.db
 
-# ==============================================================================
-# MISC files
-# ==============================================================================
-
-etl/mimic-clinical-pipeline.code-workspace

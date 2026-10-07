@@ -1,0 +1,97 @@
+How to Force Push to Github
+1) Make sure local repo is up to date
+cd /path/to/your/local/project
+git status
+
+2) Stage and commit everything
+git add .
+git commit -m "Update project structure: Phase I + II + III"
+
+3) Force push to GitHub
+git push origin stable/or master --force
+
+*** Forgot to merge with master and stable
+Force-pushed stable branch to GitHub, but local main branch hasn’t been updated or merged yet.
+
+1) Check local branches
+git branch
+git checkout master
+git merge stable
+git merge --strategy-option theirs stable (If conflict)
+git commit -m "merge"
+
+Force updates from github to local
+1) git checkout stable
+
+2) git fetch origin
+3) git reset --hard origin/stable
+verify -->
+git status
+git log --oneline -1
+
+
+
+3) git checkout origin/master -- README.md
+4) git status
+5) git add README.md
+6) git commit -m "Update local README from GitHub"
+
+Untrack the entire project
+# 1. Clear out Git's tracking cache memory for the entire project workspace
+# (This removes the cache flags safely; your actual local folders/files WILL NOT be deleted!)
+git rm -r --cached .
+git add .
+
+git rm -r --cached phase1-pandas-dag/tests/data/raw/
+
+cd ..
+git rm -r --cached phase1b-soda-dag/data/
+git commit -m "remove large data files from tracking"
+git push origin stable
+
+cd ..
+git rm -r --cached phase1b-soda-dag/data/
+git commit -m "remove large data files from tracking"
+git push origin stable
+
+Git-Screenshots
+1️⃣ Inline image (appear in readme)
+![Extract & Load CSV](phase2-pandas-hybrid/pandas_etl_screenshots/extract_load_csv.png)
+
+2️⃣ Clickable link (opens image when clicked)
+[Extract & Load CSV Screenshot](phase2-pandas-hybrid/pandas_etl_screenshots/extract_load_csv.png)
+
+GITHUB UI MERGE
+Pull Request: Base vs. Compare
+
+Base → the branch you want to update / merge into.
+Compare (or head) → the branch that has the new changes you want to bring from.
+
+Go to GitHub → your repo → Pull requests → New pull request.
+
+Select:
+Base: master
+Compare: stable
+Review changes → Create PR → Merge PR.
+After merging, master will have all the updates from stable.
+
+✅ Key tip:
+The base is always the branch that will receive the changes.
+The compare/head is the branch that has the new commits.
+
+Troubleshooting
+fatal: Unable to create 'C:/PythonProject/CenterDiseaseControl/.git/index.lock': File exists.
+ rm .git/index.lock
+
+rename repo in Github
+After rename repo
+git remote set-url origin https://github.com/masabai/aws-center-disease-etl.git
+
+Found a swap file by the name "/c/PythonProject/CenterDiseaseControl/.git/.MERGE_MSG.swp"
+          owned by: sawyn   dated: Sat Nov 22 13:17:45 2025
+[O]pen Read-Only
+[E]dit anyway
+[R]ecover
+[D]elete swap file
+If you just want to continue the merge:
+Press D → deletes the swap filed

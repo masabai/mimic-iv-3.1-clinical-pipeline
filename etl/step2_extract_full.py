@@ -2,43 +2,42 @@ import os
 import subprocess
 import time
 
+
 # ==============================================================================
 # CONFIGURATIONS (FULL MIMIC-IV v3.1 CREDENTIALED EXTRACT VIA NATIVE WGET)
 # ==============================================================================
 PHYSIONET_USER = "maye2026"   
-PHYSIONET_PASS = "xxxx"       
+PHYSIONET_PASS = "21Mar1968"       
 
-# Target output directory
-LOCAL_DOWNLOAD_DIR = r"C:\PythonProjects\data"
+# Target output directory 
+LOCAL_DOWNLOAD_DIR=r"\mimiciv_full\data"
 os.makedirs(LOCAL_DOWNLOAD_DIR, exist_ok=True)
 
 def run_wget_extract():
     print("==================================================================")
-    print("PIPELINE PHASE: NATIVE WGET EXTRACTOR (MIMIC-IV v3.1 FULL)")
+    print("PIPELINE PHASE: NATIVE WGET EXTRACTOR (MIMIC-IV FULL)")
     print("==================================================================")
     print(f"Target Directory : {LOCAL_DOWNLOAD_DIR}")
     print("==================================================================\n")
-    
-    start_time = time.time()
-    
+        
     # Official absolute URL tree
     target_url = "https://physionet.org/files/mimiciv/3.1/"
-    
-    # Constructing the exact parameters from the PhysioNet documentation
-    # -r (recursive), -np (no parent), -c (continue partial downloads)
-    # --directory-prefix maps it directly to your C drive project data space
+       
+   # Constructing the exact parameters from the PhysioNet documentation
+   # -r (recursive), -np (no parent), -c (continue partial downloads)
+   # --directory-prefix maps it directly to project data space
     wget_command = [
-        "wget",
-        "-r",
-        "-N",
-        "-c",
-        "-np",
-        f"--user={PHYSIONET_USER}",
-        f"--password={PHYSIONET_PASS}",
-        f"--directory-prefix={LOCAL_DOWNLOAD_DIR}",
-        "--no-check-certificate",
-        target_url
-    ]
+            "wget",
+            "-r",
+            "-N",
+            "-c",
+            "-np",
+            f"--user={PHYSIONET_USER}",
+            f"--password={PHYSIONET_PASS}",
+            f"--directory-prefix={LOCAL_DOWNLOAD_DIR}",
+            "--no-check-certificate",
+            target_url
+        ]
     
     try:
         print("Launching background network stream process...")
@@ -50,7 +49,7 @@ def run_wget_extract():
             stderr=subprocess.STDOUT,
             text=True,
             bufsize=1,
-            shell=True
+            shell=False
         )
         
         # Read and display the real-time download status streams
@@ -68,7 +67,7 @@ def run_wget_extract():
             raise subprocess.CalledProcessError(return_code, wget_command)
             
         print("\n==================================================================")
-        print("EXTRACT COMPLETE: All version 3.1 streams successfully landed.")
+        print("EXTRACT COMPLETE: MIMIC-IV FULL streams.")
         print(f"Total Pipeline Runtime: {(time.time() - start_time) / 60:.2f} minutes")
         print("==================================================================")
         
@@ -77,4 +76,18 @@ def run_wget_extract():
         raise error
 
 if __name__ == "__main__":
-    run_wget_extract()
+    
+    start_time = time.perf_counter()
+    print("Starting to ingest.......")
+    
+    run_wget_extract()        
+    
+    end_time = time.perf_counter()
+    elapsed_time = end_time - start_time
+    hours = int(elapsed_time // 3600)
+    minutes = int((elapsed_time % 3600) // 60)
+    seconds = int(elapsed_time % 60)
+        
+    print(f"\nTotal time to ingest: {hours}h {minutes}m {seconds}s")
+    
+    

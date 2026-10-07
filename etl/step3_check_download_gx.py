@@ -11,7 +11,9 @@ from concurrent.futures import ThreadPoolExecutor
 # ==============================================================================
 # CONFIGURATION — STRICT PRE-INGESTION SMOKE GATES
 # ==============================================================================
-LANDING_ZONE_DIR = Path(r"C:\PythonProjects\data\mimic-iv-3.1")
+LANDING_ZONE_DIR = Path(r"C:\mimiciv_full\data\physionet.org\files\mimiciv\3.1")
+
+print(f"[CONFIG] LANDING_ZONE_DIR = {LANDING_ZONE_DIR}")
 LOGS_OUTPUT_DIR = Path(r"C:\PythonProjects\mimic-clinical-pipeline\etl\validation")
 LOGS_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
