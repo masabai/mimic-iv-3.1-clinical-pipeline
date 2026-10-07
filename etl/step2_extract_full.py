@@ -7,7 +7,7 @@ import time
 # CONFIGURATIONS (FULL MIMIC-IV v3.1 CREDENTIALED EXTRACT VIA NATIVE WGET)
 # ==============================================================================
 PHYSIONET_USER = "maye2026"   
-PHYSIONET_PASS = "21Mar1968"       
+PHYSIONET_PASS = "xxxxxxx"       
 
 # Target output directory 
 LOCAL_DOWNLOAD_DIR=r"\mimiciv_full\data"

@@ -8,10 +8,10 @@ from prefect import flow, task
 # CONFIGURATION
 # ==============================================================================
 
-PROJECT_ROOT = Path(r"C:\PythonProject\mimic-demo")
+PROJECT_ROOT = Path(r"C:\PythonProjects\mimic-clinical-pipeline")
 
 PYTHON_EXE = (
-    r"C:\Users\sawyn\AppData\Local\Programs\Python\Python311\python.exe"
+    r"C:\Users\moesa\AppData\Local\Programs\Python\Python313\python.exe"
 )
 
 
@@ -67,7 +67,7 @@ def mimic_demo_pipeline():
     if exists:
         print("Data exists — skip extraction.")
     else:
-        run_step("step2_extract_demo.py")
+        run_step("step2_extract_full.py")
 
     run_step("step3_check_download_gx.py")
     run_step("step4_verify_schemas.py")
