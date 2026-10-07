@@ -22,11 +22,12 @@ def check_ingestion():
         print(f"[STEP 1] icu:  {icu_path}")
         print("[STEP 1] PASS: Extraction phase can be skipped.")
         return True
-
-    print("[STEP 1] MIMIC-IV data directories are missing.")
-    print(f"[STEP 1] Expected: {hosp_path}")
-    print(f"[STEP 1] Expected: {icu_path}")
-    return False
+    
+    else:
+        print("[STEP 1] MIMIC-IV data directories are missing.")
+        print(f"[STEP 1] Expected: {hosp_path}")
+        print(f"[STEP 1] Expected: {icu_path}")
+        return False
 
 
 if __name__ == "__main__":
