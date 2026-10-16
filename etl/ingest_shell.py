@@ -1,4 +1,7 @@
 import os
+# pip install python-dotenv
+
+from dotenv import load_dotenv
 import subprocess
 import time
 from pathlib import Path
@@ -6,8 +9,8 @@ from pathlib import Path
 # ==============================================================================
 # CONFIGURATIONS (AUTOMATED INGESTION FLOW VIA MIT SHELL SCRIPT)
 # ==============================================================================
-PHYSIONET_USER = "maye2026"   
-PHYSIONET_PASS = "21Mar1968"       
+PHYSIONET_USER = os.getenv("PHYSIONET_USER")
+PHYSIONET_PASS = os.getenv("PHYSIONET_PASS")
 
 # Path in Linux environment
 LOCAL_DOWNLOAD_DIR = "/home/moesa/mimiciv_full/data"
