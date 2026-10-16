@@ -10,7 +10,8 @@ PHYSIONET_USER = "maye2026"
 PHYSIONET_PASS = "xxxxxxx"       
 
 # Target output directory 
-LOCAL_DOWNLOAD_DIR=r"\mimiciv_full\data"
+# LOCAL_DOWNLOAD_DIR=r"\mimiciv_full\data"
+LOCAL_DOWNLOAD_DIR = "/mnt/c/mimiciv_full/data"
 os.makedirs(LOCAL_DOWNLOAD_DIR, exist_ok=True)
 
 def run_wget_extract():

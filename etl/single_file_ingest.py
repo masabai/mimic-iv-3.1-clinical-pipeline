@@ -1,0 +1,94 @@
+import os
+import subprocess
+import time
+
+
+# ==============================================================================
+# CONFIGURATIONS (FULL MIMIC-IV v3.1 CREDENTIALED EXTRACT VIA NATIVE WGET)
+# ==============================================================================
+PHYSIONET_USER = "maye2026"   
+PHYSIONET_PASS = "21Mar1968"       
+
+# Target output directory 
+LOCAL_DOWNLOAD_DIR = "/home/moesa/mimiciv_full/data"
+
+os.makedirs(LOCAL_DOWNLOAD_DIR, exist_ok=True)
+
+def run_wget_extract():
+    print("==================================================================")
+    print("PIPELINE PHASE: NATIVE WGET EXTRACTOR (MIMIC-IV FULL)")
+    print("==================================================================")
+    print(f"Target Directory : {LOCAL_DOWNLOAD_DIR}")
+    print("==================================================================\n")
+        
+    # Official absolute URL tree
+    target_url = "https://physionet.org/files/mimiciv/3.1/hosp/omar.csv.gz"
+       
+   # Constructing the exact parameters from the PhysioNet documentation
+   # -r (recursive), -np (no parent), -c (continue partial downloads)
+   # --directory-prefix maps it directly to project data space
+    wget_command = [
+            "wget",
+            "-r",
+            "-N",
+            "-c",
+            "-np",
+            f"--user={PHYSIONET_USER}",
+            f"--password={PHYSIONET_PASS}",
+            f"--directory-prefix={LOCAL_DOWNLOAD_DIR}",
+            "--no-check-certificate",
+            target_url
+        ]
+    
+    try:
+        print("Launching background network stream process...")
+        
+        # Popen pipes the live network download logs straight to the console
+        process = subprocess.Popen(
+            wget_command,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            bufsize=1,
+            shell=False
+        )
+        
+        # Read and display the real-time download status streams
+        while True:
+            line = process.stdout.readline()
+            if not line and process.poll() is not None:
+                break
+            if line:
+                cleaned_line = line.strip()
+                if cleaned_line:
+                    print(f"[WGET STREAM] {cleaned_line}")
+                    
+        return_code = process.poll()
+        if return_code != 0:
+            raise subprocess.CalledProcessError(return_code, wget_command)
+            
+        print("\n==================================================================")
+        print("EXTRACT COMPLETE: MIMIC-IV FULL streams.")
+        print(f"Total Pipeline Runtime: {(time.time() - start_time) / 60:.2f} minutes")
+        print("==================================================================")
+        
+    except Exception as error:
+        print(f"\nExtraction Step Failed: {str(error)}")
+        raise error
+
+if __name__ == "__main__":
+    
+    start_time = time.perf_counter()
+    print("Starting to ingest.......")
+    
+    run_wget_extract()        
+    
+    end_time = time.perf_counter()
+    elapsed_time = end_time - start_time
+    hours = int(elapsed_time // 3600)
+    minutes = int((elapsed_time % 3600) // 60)
+    seconds = int(elapsed_time % 60)
+        
+    print(f"\nTotal time to ingest: {hours}h {minutes}m {seconds}s")
+    
+    

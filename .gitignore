@@ -19,7 +19,7 @@ dbt_project/profiles.yml
 .vscode/
 .idea/
 archived/
-docs/*
+misc/*
 
 # OS
 .DS_Store
