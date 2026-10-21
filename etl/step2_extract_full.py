@@ -6,12 +6,11 @@ import time
 # ==============================================================================
 # CONFIGURATIONS (FULL MIMIC-IV v3.1 CREDENTIALED EXTRACT VIA NATIVE WGET)
 # ==============================================================================
-PHYSIONET_USER = "maye2026"   
+PHYSIONET_USER = "xxxxxxx"   
 PHYSIONET_PASS = "xxxxxxx"       
 
 # Target output directory 
-# LOCAL_DOWNLOAD_DIR=r"\mimiciv_full\data"
-LOCAL_DOWNLOAD_DIR = "/mnt/c/mimiciv_full/data"
+LOCAL_DOWNLOAD_DIR=r"\mimiciv_full\data"
 os.makedirs(LOCAL_DOWNLOAD_DIR, exist_ok=True)
 
 def run_wget_extract():
@@ -27,6 +26,8 @@ def run_wget_extract():
    # Constructing the exact parameters from the PhysioNet documentation
    # -r (recursive), -np (no parent), -c (continue partial downloads)
    # --directory-prefix maps it directly to project data space
+   # wget -r -N -c -np --user maye2026 --ask-password https://physionet.org/files/mimiciv/3.1/
+
     wget_command = [
             "wget",
             "-r",
@@ -36,7 +37,7 @@ def run_wget_extract():
             f"--user={PHYSIONET_USER}",
             f"--password={PHYSIONET_PASS}",
             f"--directory-prefix={LOCAL_DOWNLOAD_DIR}",
-            "--no-check-certificate",
+            #"--no-check-certificate",
             target_url
         ]
     

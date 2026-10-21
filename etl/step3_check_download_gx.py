@@ -13,6 +13,13 @@ from concurrent.futures import ThreadPoolExecutor
 # ==============================================================================
 LANDING_ZONE_DIR = Path(r"C:\mimiciv_full\data\physionet.org\files\mimiciv\3.1")
 
+#####################################################################################################
+# Path in Linux environment
+LOCAL_DOWNLOAD_DIR = "/home/moesa/mimiciv_full/data"
+MIT_SCRIPT_PATH = "/home/moesa/mimic/mimic-iv-3.1-clinical-pipeline/mimic-mit-build/download_data.sh"
+#####################################################################################################
+
+
 print(f"[CONFIG] LANDING_ZONE_DIR = {LANDING_ZONE_DIR}")
 LOGS_OUTPUT_DIR = Path(r"C:\PythonProjects\mimic-clinical-pipeline\etl\validation")
 LOGS_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)

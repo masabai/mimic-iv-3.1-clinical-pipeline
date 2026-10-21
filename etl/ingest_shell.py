@@ -1,7 +1,7 @@
 import os
 # pip install python-dotenv
 
-from dotenv import load_dotenv
+#from dotenv import load_dotenv
 import subprocess
 import time
 from pathlib import Path
@@ -32,7 +32,6 @@ def run_mit_shell_extract():
         LOCAL_DOWNLOAD_DIR, 
         PHYSIONET_USER
     ]
-
     
     try:
         print("Launching MIT shell script process...")
@@ -49,17 +48,12 @@ def run_mit_shell_extract():
             ingest_command,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
-            stdin=subprocess.PIPE, 
+            stdin=subprocess.DEVNULL, # Block stdin interference entirely
             text=True,
             bufsize=1,
             shell=False,
             env=process_env
         )
-        
-        # Automatically feeds your password straight down the interactive shell pipe
-        process.stdin.write(f"{PHYSIONET_PASS}\n")
-        process.stdin.flush()
-
         
         # Read and display the real-time download status streams
         while True:

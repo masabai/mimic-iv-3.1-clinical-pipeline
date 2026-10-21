@@ -39,3 +39,5 @@ wget -r -N -c -np -nH --cut-dirs=4 \
     "https://physionet.org/files/mimiciv/${MIMIC_VERSION}/"
 
 echo "Downloaded $(find "${DEST}" -name '*.csv.gz' | wc -l | tr -d ' ') files to ${DEST}"
+
+

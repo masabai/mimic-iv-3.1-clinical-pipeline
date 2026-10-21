@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  # 1. The Database (Isolated Container)
+  postgres-db:
+    image: postgres:15
+    container_name: mimic_postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: your_secure_password
+      POSTGRES_DB: mimiciv
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  # 2. Local LLM Service (Isolated Container)
+  ollama-llm:
+    image: ollama/ollama:latest
+    container_name: mimic_ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_storage:/root/.ollama
+
+  # 3. Your Execution Engine (Prefect, dbt, GX)
+  elt-pipeline:
+    build: .
+    container_name: mimic_pipeline
+    volumes:
+      - .:/app
+      - /home/moesa/mimiciv_full/data:/data # Map your full dataset files here
+    environment:
+      - LOCAL_DOWNLOAD_DIR=/data
+      - SLACK_WEBHOOK_URL=https://hooks.slack.com/services/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
+      - OLLAMA_HOST=http://ollama-llm:11434 # Tells Python to look for the LLM container inside Docker
+    depends_on:
+      - postgres-db
+      - ollama-llm
