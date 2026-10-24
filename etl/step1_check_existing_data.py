@@ -2,32 +2,31 @@ from pathlib import Path
 
 
 # ==============================================================================
-# CONFIGURATION — LOCAL DATA PATH
+# CONFIGURATION
 # ==============================================================================
-LOCAL_DOWNLOAD_DIR = Path(r"C:\mimiciv_full\data")
+LOCAL_DOWNLOAD_DIR = Path("/data")   # mapped from /home/moesa/mimiciv_data in docker-compose
+
 
 # ==============================================================================
-# STEP 1 — CHECK TARGET DATA DIRECTORIES
+# STEP 1 — CHECK DATA DIRECTORIES EXIST
 # ==============================================================================
-
 def check_ingestion():
-    """Check whether MIMIC-IV hosp and icu data directories exist."""
+    hosp_path = LOCAL_DOWNLOAD_DIR / "hosp"
+    icu_path  = LOCAL_DOWNLOAD_DIR / "icu"
 
-    hosp_path = LOCAL_DOWNLOAD_DIR / "physionet.org/files/mimiciv/3.1/hosp"
-    icu_path = LOCAL_DOWNLOAD_DIR / "physionet.org/files/mimiciv/3.1/icu"
+    hosp_ok = hosp_path.exists() and any(hosp_path.iterdir())
+    icu_ok  = icu_path.exists()  and any(icu_path.iterdir())
 
-    if hosp_path.exists() and icu_path.exists():
-        print(f"[STEP 1] MIMIC-IV data detected at: {LOCAL_DOWNLOAD_DIR}")
+    if hosp_ok and icu_ok:
+        print(f"[STEP 1] PASS — data found at {LOCAL_DOWNLOAD_DIR}")
         print(f"[STEP 1] hosp: {hosp_path}")
         print(f"[STEP 1] icu:  {icu_path}")
-        print("[STEP 1] PASS: Extraction phase can be skipped.")
         return True
-    
-    else:
-        print("[STEP 1] MIMIC-IV data directories are missing.")
-        print(f"[STEP 1] Expected: {hosp_path}")
-        print(f"[STEP 1] Expected: {icu_path}")
-        return False
+
+    print("[STEP 1] FAIL — hosp or icu directory missing or empty")
+    print(f"[STEP 1] Expected: {hosp_path}")
+    print(f"[STEP 1] Expected: {icu_path}")
+    return False
 
 
 if __name__ == "__main__":

@@ -1,39 +1,30 @@
-version: '3.8'
-
 services:
-  # 1. The Database (Isolated Container)
-  postgres-db:
-    image: postgres:15
-    container_name: mimic_postgres
+  prefect-server:
+    image: prefecthq/prefect:3.4.0-python3.12
+    container_name: prefect_server
+    command: prefect server start --host 0.0.0.0
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: your_secure_password
-      POSTGRES_DB: mimiciv
+      - PREFECT_UI_API_URL=http://localhost:4201/api
     ports:
-      - "5432:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
+      - "4201:4200"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:4200/api/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
-  # 2. Local LLM Service (Isolated Container)
-  ollama-llm:
-    image: ollama/ollama:latest
-    container_name: mimic_ollama
-    ports:
-      - "11434:11434"
-    volumes:
-      - ollama_storage:/root/.ollama
-
-  # 3. Your Execution Engine (Prefect, dbt, GX)
   elt-pipeline:
     build: .
     container_name: mimic_pipeline
+    depends_on:
+      prefect-server:
+        condition: service_healthy
     volumes:
       - .:/app
-      - /home/moesa/mimiciv_full/data:/data # Map your full dataset files here
+      - /home/moesa/mimiciv_data:/data
+      - /home/moesa/mimiciv_duckdb:/duckdb
     environment:
       - LOCAL_DOWNLOAD_DIR=/data
-      - SLACK_WEBHOOK_URL=https://hooks.slack.com/services/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
-      - OLLAMA_HOST=http://ollama-llm:11434 # Tells Python to look for the LLM container inside Docker
-    depends_on:
-      - postgres-db
-      - ollama-llm
+      - MIMIC_DB=/duckdb/mimic4.db
+      - PREFECT_API_URL=http://prefect-server:4200/api

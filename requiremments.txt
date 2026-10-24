@@ -1,5 +1,6 @@
 # Orchestration
-prefect==3.4.14
+prefect==3.4.0
+fastapi>=0.110.0,<0.113.0
 
 # Data Quality / Validation
 great-expectations==1.10.0
@@ -8,8 +9,11 @@ great-expectations==1.10.0
 psycopg[binary]==3.3.6
 
 # Transformation
-dbt-core==1.12.5
-dbt-postgres==1.11.0
+dbt-core>=1.8.0,<1.10.0
+dbt-duckdb==1.9.1
 
 # Testing
 pytest==9.0.2
+
+# Environment
+python-dotenv>=1.2.0

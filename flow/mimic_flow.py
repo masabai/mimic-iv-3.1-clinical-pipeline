@@ -1,27 +1,24 @@
-import time
 import subprocess
 from pathlib import Path
 from prefect import flow, task
-
+from notify_slack_channel import send_slack, on_task_failure
 
 # ==============================================================================
 # CONFIGURATION
 # ==============================================================================
+PROJECT_ROOT = Path("/app")
+LOCAL_DOWNLOAD_DIR = "/data"
+#MIT_SCRIPT_PATH = "/app/mimic-code/mimic-iv/buildmimic/duckdb/build_mimic.sh"
+PYTHON_EXE = "python3"
 
-PROJECT_ROOT = Path(r"C:\PythonProjects\mimic-clinical-pipeline")
-
-PYTHON_EXE = (
-    r"C:\Users\moesa\AppData\Local\Programs\Python\Python313\python.exe"
-)
-
+DBT_PROJECT_DIR = PROJECT_ROOT / "dbt_project"
+DBT_PROFILES_DIR = DBT_PROJECT_DIR
 
 # ==============================================================================
 # CHECK DATA ALREADY DOWNLOADED
 # ==============================================================================
-
-@task(name="Step 1: Check MIMIC-IV data")
+@task(name="Step 1: Check MIMIC-IV data", on_failure=[on_task_failure])
 def check_ingestion():
-
     script_path = PROJECT_ROOT / "etl" / "step1_check_existing_data.py"
 
     result = subprocess.run(
@@ -31,72 +28,69 @@ def check_ingestion():
 
     return result.returncode == 0
 
-
 # ==============================================================================
-# RUN STEPS
+# RUN ETL STEPS
 # ==============================================================================
-
-@task
+@task(on_failure=[on_task_failure], task_run_name="{script_name}")
 def run_step(script_name):
     script_path = PROJECT_ROOT / "etl" / script_name
-    
+
     print(f"\n[PREFECT] Running {script_name}...")
-    
+
     result = subprocess.run(
         [PYTHON_EXE, str(script_path)],
-        cwd=PROJECT_ROOT
+        cwd=PROJECT_ROOT,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True
     )
+
+    if result.stdout:
+        print(result.stdout)
 
     if result.returncode != 0:
         raise RuntimeError(
-            f"{script_name} failed with return code {result.returncode}"
+            f"{script_name} failed with return code "
+            f"{result.returncode}"
         )
 
     print(f"[PREFECT] {script_name} completed.")
 
-
 # ==============================================================================
 # PIPELINE
 # ==============================================================================
-
 @flow(name="MIMIC-IV Clinical Pipeline")
-def mimic_demo_pipeline():
-
+def mimiciv_pipeline():
+    
     exists = check_ingestion()
 
     if exists:
         print("Data exists — skip extraction.")
     else:
-        run_step("step2_extract_full.py")
+        run_step("step2_ingest_aws.py")
 
     run_step("step3_check_download_gx.py")
-    run_step("step4_verify_schemas.py")
-    run_step("step5_run_buildmimic_part1.py")
-    run_step("step6_run_buildmimic_part2.py")
-    print("\n[PREFECT] All steps completed successfully.")
-    
+    db_path = Path("/duckdb/mimic4.db")
+    if db_path.exists() and db_path.stat().st_size > 0:
+        print("[STEP 4] DuckDB already exists — skipping build.")
+    else:
+        run_step("step4_build_duckdb.py")
+    #run_step("step5_run_dbt.py")
+    #run_step("step6_verify_model_schemas.py")
 
+    print("\n[PREFECT] All steps completed successfully.")
 
 # ==============================================================================
 # RUN
 # ==============================================================================
-
 if __name__ == "__main__":
-    
     try:
+        print("Starting MIMIC-IV pipeline...")
         
-        start_time = time.perf_counter()
-        print("Starting MIMIC-IV pipeline.......")
-    
-        mimic_demo_pipeline()
+        mimiciv_pipeline()
+        send_slack(":large_green_circle: *MIMIC-IV Pipeline — All Steps Passed* :white_check_mark:")
         
-        end_time = time.perf_counter()
-        elapsed_time = end_time - start_time
-        hours = int(elapsed_time // 3600)
-        minutes = int((elapsed_time % 3600) // 60)
-        seconds = int(elapsed_time % 60)
-        
-        print(f"\nTotal Process Time to run pipeline: {hours}h {minutes}m {seconds}s")
-    
     except Exception as err:
-            print(f"\n[PIPELINE ERROR] Automation flow terminated unexpectedly:\n{err}")
+        send_slack(f":rotating_light: *MIMIC Pipeline — Pipeline Crashed*\n```{err}```")
+        print(f"\n[PIPELINE ERROR] Automation flow terminated unexpectedly:\n{err}")
+        raise

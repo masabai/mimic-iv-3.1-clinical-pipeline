@@ -7,6 +7,43 @@ Exploring a large, real-world clinical dataset out of curiosity and a research i
 
 ---
 
+## Quick Start
+
+### Prerequisites
+- Ubuntu
+- Docker & Docker Compose
+- Git
+
+```bash
+sudo apt update && sudo apt install -y git docker.io docker-compose unzip
+sudo usermod -aG docker $USER && newgrp docker
+
+git clone https://github.com/<your-github-username>/mimic-iv-3.1-clinical-pipeline.git
+cd mimic-iv-3.1-clinical-pipeline
+docker compose up --build
+```
+
+> See `misc/setup_linux.md` for the full step-by-step guide.
+
+---
+
+## Data Ingestion
+
+MIMIC-IV requires a PhysioNet account and data use approval: https://physionet.org
+
+**Option 1: Manual (easiest — no AWS or CLI setup)**
+Download from PhysioNet, place files in `~/mimiciv_data/` with `hosp/` and `icu/` subfolders.
+
+**Option 2: AWS S3 (~2 mins)**
+Requires AWS account + IAM + PhysioNet-AWS handshake. See `misc/ingest_awscli_setup.md`.
+
+**Option 3: wget via PhysioNet (can take days)**
+Requires PhysioNet credentials in `.env`. No AWS needed.
+
+> Set `INGEST_METHOD=manual`, `aws`, or `wget` in `.env` to select method.
+
+---
+
 ## Project Objectives
 
 ### 1. Medical Research & Clinical Analysis

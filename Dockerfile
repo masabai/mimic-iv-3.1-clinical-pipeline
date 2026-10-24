@@ -1,20 +1,22 @@
-FROM python:3.11-slim
+FROM python:3.12-slim
 
 WORKDIR /app
 
-# Install git and postgres client libraries needed for compilation
 RUN apt-get update && apt-get install -y \
     git \
-    libpq-dev \
     gcc \
+    unzip \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy your pip configuration and install the full stack
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Install DuckDB CLI
+RUN curl -L https://github.com/duckdb/duckdb/releases/download/v1.2.2/duckdb_cli-linux-amd64.zip -o duckdb.zip \
+    && unzip duckdb.zip -d /usr/local/bin \
+    && rm duckdb.zip
 
-# Copy the rest of your project files into the container
+COPY requiremments.txt .
+RUN pip install --no-cache-dir -r requiremments.txt
+
 COPY . .
 
-# Keep the container awake or run your Prefect flow entrypoint
 CMD ["python", "flow/mimic_flow.py"]

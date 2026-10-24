@@ -13,7 +13,8 @@ dbt_project/profiles.yml
 
 # Environment / secrets
 .env
-.env.*
+.env.local
+.env.*.local
 
 # IDE
 .vscode/
@@ -24,4 +25,7 @@ misc/*
 # OS
 .DS_Store
 Thumbs.db
+
+
+echo "mimic-code/" >> .gitignore
 
