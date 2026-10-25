@@ -153,7 +153,7 @@ if __name__ == "__main__":
         runtime = (time.time() - start_time) / 60
         print("\n==================================================================")
         print(f"[SUCCESS] PRE-INGESTION CHECKS PASSED IN {runtime:.2f} MINUTES")
-        print("Ready for PostgreSQL Load step.")
+        print("Ready for Load step.")
         print("==================================================================")
         
         sys.exit(0)  # <--- EXPLICITLY RETURN STATUS 0 (SUCCESS) TO PREFECT (for next step)

@@ -29,6 +29,20 @@ def check_ingestion():
     return result.returncode == 0
 
 # ==============================================================================
+# CHECK Database
+# ==============================================================================
+@task(name="Step 4: Check Duckdb loaded", on_failure=[on_task_failure])
+def verify_duckdb():
+    script_path = PROJECT_ROOT / "etl" / "step4_verify_duckdb.py"
+
+    print("\n[PIPELINE] Checking if DuckDB is valid...")
+    result = subprocess.run(
+        [PYTHON_EXE, str(script_path)],
+        cwd=PROJECT_ROOT
+    )
+    return result.returncode == 0
+
+# ==============================================================================
 # RUN ETL STEPS
 # ==============================================================================
 @task(on_failure=[on_task_failure], task_run_name="{script_name}")
@@ -62,20 +76,23 @@ def run_step(script_name):
 @flow(name="MIMIC-IV Clinical Pipeline")
 def mimiciv_pipeline():
     
-    exists = check_ingestion()
 
-    if exists:
+    if check_ingestion():
         print("Data exists — skip extraction.")
     else:
         run_step("step2_ingest_aws.py")
 
     run_step("step3_check_download_gx.py")
-    db_path = Path("/duckdb/mimic4.db")
-    if db_path.exists() and db_path.stat().st_size > 0:
+    
+    if verify_duckdb():
         print("[STEP 4] DuckDB already exists — skipping build.")
     else:
-        run_step("step4_build_duckdb.py")
-    #run_step("step5_run_dbt.py")
+        print("[PIPELINE] DuckDB missing or invalid — starting loader.")
+        run_step("step5_build_duckdb.py")
+       
+# Verify the database again after loading.
+    run_step("step4_verify_duckdb.py")
+    #run_step("step6_run_dbt.py")
     #run_step("step6_verify_model_schemas.py")
 
     print("\n[PREFECT] All steps completed successfully.")

@@ -1,0 +1,44 @@
+
+services:
+  prefect-server:
+    image: prefecthq/prefect:3.4.0-python3.12
+    container_name: prefect_server
+    command: prefect server start --host 0.0.0.0
+    environment:
+      - PREFECT_UI_API_URL=http://localhost:4201/api
+    ports:
+      - "4201:4200"
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://localhost:4200/api/health')"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  elt-pipeline:
+    build: .
+    container_name: mimic_pipeline
+    depends_on:
+      prefect-server:
+        condition: service_healthy
+    volumes:
+      - .:/app
+      - /home/moesa/mimiciv_data:/data
+      - /home/moesa/mimiciv_duckdb:/duckdb
+      # Force the container to read the current DuckDB build script
+      - ./etl/step4_build_duckdb.py:/app/etl/step4_build_duckdb.py
+    environment:
+      - LOCAL_DOWNLOAD_DIR=/data
+      - MIMIC_DB=/duckdb/mimic4.db
+      - PREFECT_API_URL=http://prefect-server:4200/api
+      # DuckDB memory limit
+      - DUCKDB_MEMORY_LIMIT=6GB
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 8G
