@@ -5,6 +5,7 @@ __pycache__/
 venv/
 
 # dbt
+dbt_project/seeds/
 dbt_project/target/
 dbt_project/logs/
 dbt_project/dbt_packages/

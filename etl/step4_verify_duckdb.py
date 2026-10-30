@@ -1,27 +1,33 @@
-
 import os
 import sys
+from pathlib import Path
 import duckdb
 
 MIMIC_DB = os.getenv("MIMIC_DB", "/duckdb/mimic4.db")
+CSV_DIR = Path("/data")
 
-EXPECTED_TABLES = [
-    # hosp
-    "mimiciv_hosp.admissions",
-    "mimiciv_hosp.patients",
-    "mimiciv_hosp.transfers",
-    "mimiciv_hosp.diagnoses_icd",
-    "mimiciv_hosp.procedures_icd",
-    "mimiciv_hosp.labevents",
-    "mimiciv_hosp.prescriptions",
-    "mimiciv_hosp.pharmacy",
-    "mimiciv_hosp.omr",
-    # icu
-    "mimiciv_icu.chartevents",
-    "mimiciv_icu.icustays",
-    "mimiciv_icu.inputevents",
-    "mimiciv_icu.outputevents",
+# 1. Hardcoded Athena tables (since they live inside the zip archive)
+ATHENA_TABLES = [
+    "athena.concept",
+    "athena.concept_class",
+    "athena.concept_relationship",
+    "athena.domain",
+    "athena.relationship",
+    "athena.vocabulary",
 ]
+
+# 2. Dynamically scan 'hosp' and 'icu' subdirectories for MIMIC tables
+MIMIC_TABLES = []
+for module in ["hosp", "icu"]:
+    module_dir = CSV_DIR / module
+    if module_dir.is_dir():
+        # Captures file names like 'patients.csv.gz' and extracts 'patients'
+        for file_path in module_dir.glob("*.csv.gz"):
+            table_name = file_path.name.split(".")[0]
+            MIMIC_TABLES.append(f"mimiciv.{table_name}")
+
+# 3. Combine both lists dynamically
+EXPECTED_TABLES = ATHENA_TABLES + MIMIC_TABLES
 
 
 def verify_duckdb():
@@ -44,9 +50,10 @@ def verify_duckdb():
         rows = con.execute("""
             SELECT table_schema || '.' || table_name
             FROM information_schema.tables
-            WHERE table_schema IN ('mimiciv_hosp', 'mimiciv_icu')
+            WHERE table_schema IN ('mimiciv', 'athena')
         """).fetchall()
 
+        # FIXED: Extract the raw string from the 1-element tuple row
         tables = {row[0] for row in rows}
         missing = [table for table in EXPECTED_TABLES if table not in tables]
 

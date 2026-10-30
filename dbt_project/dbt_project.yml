@@ -1,15 +1,26 @@
-
 name: 'dbt_project'
 version: '1.0.0'
 profile: 'dbt_project'
 
 models:
   dbt_project:
-    staging:
-      +materialized: ephemeral
-    clean:
+    silver:
+      +schema: silver
+      +materialized: view
+      microbiologyevents:
+        int__lk_specimen_mapped:
+          +materialized: table
+        int__lk_meas_organism_mapped:
+          +materialized: table
+        int__lk_meas_ab_mapped:
+          +materialized: table
+      admissions:
+        int__lk_visit_clean:
+          +materialized: table
+    gold:
+      +schema: gold
       +materialized: table
-      +schema: clean
-    marts:
-      +materialized: table
-      +schema: mart
+  
+seeds:
+  dbt_project:
+    +schema: silver

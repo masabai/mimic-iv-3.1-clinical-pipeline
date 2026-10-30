@@ -5,7 +5,6 @@ services:
     command: prefect server start --host 0.0.0.0
     environment:
       - PREFECT_UI_API_URL=http://localhost:4201/api
-      #- PREFECT_UI_API_URL=http://127.0.0.1
     ports:
       - "4201:4200"
     healthcheck:
@@ -24,8 +23,15 @@ services:
     volumes:
       - .:/app
       - /home/moesa/mimic/mimiciv_data:/data
+      - /home/moesa/mimic/athena_vocab:/athena
       - /home/moesa/mimic/mimiciv_duckdb:/duckdb
     environment:
       - LOCAL_DOWNLOAD_DIR=/data
       - MIMIC_DB=/duckdb/mimic4.db
       - PREFECT_API_URL=http://prefect-server:4200/api
+    # Hard limits configured perfectly for your 16GB RAM laptop
+    deploy:
+      resources:
+        limits:
+          cpus: '4.0'
+          memory: 6144M
