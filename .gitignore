@@ -22,6 +22,8 @@ dbt_project/profiles.yml
 .idea/
 archived/
 misc/*
+data/*
+
 
 # OS
 .DS_Store

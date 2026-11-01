@@ -35,3 +35,5 @@ services:
         limits:
           cpus: '4.0'
           memory: 6144M
+
+# update dbt/seed cmd here

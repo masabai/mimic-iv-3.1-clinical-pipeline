@@ -53,7 +53,7 @@ SELECT
         AS BIGINT) AS quantity,
     prov.provider_id AS provider_id,
     vis.visit_occurrence_id AS visit_occurrence_id,
-    NULL AS visit_detail_id,
+    CAST(NULL AS INTEGER) AS visit_detail_id,
     src.source_code AS device_source_value,
     src.source_concept_id AS device_source_concept_id,
     src.unit_concept_id AS unit_concept_id,

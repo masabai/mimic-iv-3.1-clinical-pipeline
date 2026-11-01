@@ -6,7 +6,7 @@ SELECT
     CAST(src.start_datetime AS DATE) AS specimen_date,
     src.start_datetime AS specimen_datetime,
     CAST(NULL AS DOUBLE) AS quantity,
-    NULL AS unit_concept_id,
+    CAST(NULL AS INTEGER) AS unit_concept_id,
     0 AS anatomic_site_concept_id,
     0 AS disease_status_concept_id,
     src.trace_id AS specimen_source_id,

@@ -14,14 +14,14 @@ SELECT
     src.range_high AS range_high,
     prov.provider_id AS provider_id,
     vis.visit_occurrence_id AS visit_occurrence_id,
-    NULL AS visit_detail_id,
+    CAST(NULL AS INTEGER) AS visit_detail_id,
     src.source_code AS measurement_source_value,
     src.source_concept_id AS measurement_source_concept_id,
     src.unit_source_value AS unit_source_value,
     src.unit_source_concept_id AS unit_source_concept_id,
     src.value_source_value AS value_source_value,
-    NULL AS measurement_event_id,
-    NULL AS meas_event_field_concept_id
+    CAST(NULL AS INTEGER) AS measurement_event_id,
+    CAST(NULL AS INTEGER) AS meas_event_field_concept_id    
 FROM
     {{ ref('int__lk_meas_labevents_mapped') }} src
 INNER JOIN

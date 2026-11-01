@@ -1,3 +1,3 @@
 select *
-from {{ source("athena_vocabulary", "VOCABULARY") }}
+from {{ source('athena', 'VOCABULARY') }}
 where vocabulary_concept_id < 2000000000

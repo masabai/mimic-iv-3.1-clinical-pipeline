@@ -14,7 +14,7 @@ select
     ) as valid_end_date,
 
     invalid_reason
-from {{ source("athena_vocabulary", "CONCEPT") }}
+from {{ source("athena", "CONCEPT") }}
 where concept_id < 2000000000
 
 UNION ALL

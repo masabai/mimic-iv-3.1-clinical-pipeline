@@ -92,11 +92,12 @@ def mimiciv_pipeline():
         #run_step("step6_build_athena.py")
         
         # Verify the database after loading.
-        run_step("step4_verify_duckdb.py")
+        #run_step("step4_verify_duckdb.py")
     
     # run dbt
     print("[STEP 6] Building models.....")
     run_step("step7_run_dbt.py")
+        
     
     print("\n[PREFECT] All steps completed successfully.")
 

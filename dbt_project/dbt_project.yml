@@ -21,6 +21,3 @@ models:
       +schema: gold
       +materialized: table
   
-seeds:
-  dbt_project:
-    +schema: silver

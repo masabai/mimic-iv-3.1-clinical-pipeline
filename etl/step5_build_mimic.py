@@ -9,8 +9,8 @@ CSV_DIR = Path("/data")
 con = duckdb.connect(str(DB_PATH))
 
 # Memory tuning configs for your 16GB RAM laptop
-con.execute("SET memory_limit = '6GB';")
-con.execute("SET threads = 4;")
+con.execute("SET memory_limit = '5GB';") #6
+con.execute("SET threads = 2;")#4
 con.execute("SET temp_directory = '/duckdb/duckdb_temp';")
 con.execute("SET max_temp_directory_size = '60GB';")
 

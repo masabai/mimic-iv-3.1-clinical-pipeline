@@ -7,14 +7,14 @@ SELECT
     CAST(src.end_datetime AS DATE) AS condition_end_date,
     src.end_datetime AS condition_end_datetime,
     src.type_concept_id AS condition_type_concept_id,
-    NULL AS condition_status_concept_id,
+    CAST(NULL AS INTEGER) AS condition_status_concept_id,
     CAST(NULL AS VARCHAR(20)) AS stop_reason,
     prov.provider_id AS provider_id,
     vis.visit_occurrence_id AS visit_occurrence_id,
-    NULL AS visit_detail_id,
+    CAST(NULL AS INTEGER) AS visit_detail_id,
     src.source_code AS condition_source_value,
     COALESCE(src.source_concept_id, 0) AS condition_source_concept_id,
-    NULL AS condition_status_source_value
+    CAST(NULL AS INTEGER) AS condition_status_source_value
 FROM
     {{ ref("int__lk_diagnoses_icd_mapped") }} AS src
 INNER JOIN

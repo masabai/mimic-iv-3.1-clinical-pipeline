@@ -10,7 +10,7 @@ select
     ) as valid_end_date,
     vr.invalid_reason
 
-from {{ source("athena_vocabulary", "CONCEPT_RELATIONSHIP") }} as vr
+from {{ source("athena", "CONCEPT_RELATIONSHIP") }} as vr
 inner join {{ ref("stg__voc_concept") }} vc1 on vc1.concept_id = vr.concept_id_1
 inner join {{ ref("stg__voc_concept") }} vc2 on vc2.concept_id = vr.concept_id_2
 

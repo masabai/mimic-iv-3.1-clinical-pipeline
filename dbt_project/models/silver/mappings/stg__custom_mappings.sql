@@ -15,4 +15,4 @@ select
     try_cast(relationship_valid_start_date as date) as relationship_valid_start_date,
     try_cast(relationship_end_date as date) as relationship_end_date,
     invalid_reason_cr
-from {{ source("athena_vocabulary", "custom_mappings") }}
+from {{ source("athena", "custom_mappings") }}

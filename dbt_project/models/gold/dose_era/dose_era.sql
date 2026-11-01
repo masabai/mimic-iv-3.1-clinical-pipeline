@@ -6,24 +6,26 @@ SELECT
     de.drug_exposure_end_date AS drug_exposure_end_date,
     de.drug_concept_id AS drug_concept_id,
     ds.ingredient_concept_id AS ingredient_concept_id,
-    de.refills AS refills,
+
+    TRY_CAST(de.refills AS DOUBLE) AS refills,
     CASE
-        WHEN de.days_supply = 0 THEN 1
-        ELSE de.days_supply
+        WHEN TRY_CAST(de.days_supply AS DOUBLE) = 0 THEN 1.0
+        ELSE TRY_CAST(de.days_supply AS DOUBLE)
     END AS days_supply,
-    de.quantity AS quantity,
-    ds.box_size AS box_size,
-    ds.amount_value AS amount_value,
+
+    TRY_CAST(de.quantity AS DOUBLE) AS quantity,
+    TRY_CAST(ds.box_size AS DOUBLE) AS box_size,
+    TRY_CAST(ds.amount_value AS DOUBLE) AS amount_value,
     ds.amount_unit_concept_id AS amount_unit_concept_id,
-    ds.numerator_value AS numerator_value,
+    TRY_CAST(ds.numerator_value AS DOUBLE) AS numerator_value,
     ds.numerator_unit_concept_id AS numerator_unit_concept_id,
-    ds.denominator_value AS denominator_value,
+    TRY_CAST(ds.denominator_value AS DOUBLE) AS denominator_value,
     ds.denominator_unit_concept_id AS denominator_unit_concept_id,
     c.concept_class_id AS concept_class_id
 FROM {{ ref('drug_exposure') }} AS de
-INNER JOIN {{ source('athena_vocabulary', 'DRUG_STRENGTH') }} AS ds
+INNER JOIN {{ source('athena', 'DRUG_STRENGTH') }} AS ds
     ON de.drug_concept_id = ds.drug_concept_id
-INNER JOIN {{ source('athena_vocabulary', 'CONCEPT_ANCESTOR') }} AS ca
+INNER JOIN {{ source('athena', 'CONCEPT_ANCESTOR') }} AS ca
     ON de.drug_concept_id = ca.descendant_concept_id
     AND ds.ingredient_concept_id = ca.ancestor_concept_id
 LEFT JOIN {{ ref('stg__voc_concept') }} AS c
@@ -151,14 +153,14 @@ SELECT
     dwd.dose_value AS dose_value,
     dwd.drug_exposure_start_date AS drug_exposure_start_date,
     dwd.days_supply AS days_supply,
-    COALESCE(dwd.drug_exposure_end_date,
-        NULLIF(
-            drug_exposure_start_date + INTERVAL '1 day' * (1 * days_supply * (COALESCE(refills, 0) + 1)),
-            drug_exposure_start_date
-        ),
-        dwd.drug_exposure_start_date + INTERVAL '1 day'
-    ) AS drug_exposure_end_date
-FROM tmp_drugWithDose AS dwd
+    COALESCE( dwd. drug_exposure_end_date,
+NULLIF(
+dwd.drug_exposure_start_date + INTERVAL '1 day' * CAST(1 * dwd.days_supply * (COALESCE(dwd.refills, 0) + 1) AS INTEGER),
+dwd. drug_exposure_start_date
+),
+dwd. drug_exposure_start_date + INTERVAL '1 day'
+) AS drug_exposure_end_date
+    FROM tmp_drugWithDose AS dwd
 WHERE 
     dose_value <> -1
 ),
@@ -171,10 +173,12 @@ SELECT
     dose_value AS dose_value,
     drug_exposure_start_date AS event_date,
     -1 AS event_type,
+    -- First window partition (around line 169)
     ROW_NUMBER() OVER (
-        PARTITION BY person_id, drug_concept_id, unit_concept_id, CAST(dose_value AS INTEGER)
-        ORDER BY drug_exposure_start_date
-    ) AS start_ordinal
+    PARTITION BY person_id, drug_concept_id, unit_concept_id, CAST(dose_value AS DOUBLE)
+    ORDER BY drug_exposure_start_date
+) AS start_ordinal
+
 FROM tmp_cteDoseTarget
 
 UNION ALL
@@ -198,11 +202,12 @@ SELECT
     dose_value AS dose_value,
     event_date AS event_date,
     event_type AS event_type,
+    -- Second window partition (around line 194)
     MAX(start_ordinal) OVER (
-        PARTITION BY person_id, drug_concept_id, unit_concept_id, CAST(dose_value AS INTEGER) -- double-check if it is a valid cast
-        ORDER BY event_date, event_type
-        ROWS UNBOUNDED PRECEDING
-    ) AS start_ordinal,
+    PARTITION BY person_id, drug_concept_id, unit_concept_id, CAST(dose_value AS DOUBLE)
+    ORDER BY event_date, event_type
+    ROWS UNBOUNDED PRECEDING
+) AS start_ordinal,
     ROW_NUMBER() OVER (
         PARTITION BY person_id, drug_concept_id, unit_concept_id, CAST(dose_value AS INTEGER)
         ORDER BY event_date, event_type

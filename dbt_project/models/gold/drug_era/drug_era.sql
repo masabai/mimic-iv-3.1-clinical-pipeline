@@ -4,7 +4,7 @@ SELECT DISTINCT
     ca.ancestor_concept_id AS ancestor_concept_id,
     c.concept_id AS concept_id
 FROM
-    {{ source("athena_vocabulary", "CONCEPT_ANCESTOR") }} AS ca
+    {{ source("athena", "CONCEPT_ANCESTOR") }} AS ca
 JOIN
     {{ ref("stg__voc_concept") }} AS c
     ON ca.ancestor_concept_id = c.concept_id

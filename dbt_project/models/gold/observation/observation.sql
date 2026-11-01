@@ -11,7 +11,7 @@ SELECT
         WHEN src.value_as_string IS NOT NULL THEN COALESCE(src.value_as_concept_id, 0)
         ELSE NULL
     END AS value_as_concept_id,
-    NULL AS qualifier_concept_id,
+    CAST(NULL AS INTEGER) AS qualifier_concept_id,
     NULL AS unit_concept_id,
     prov.provider_id AS provider_id,
     vis.visit_occurrence_id AS visit_occurrence_id,
@@ -21,8 +21,8 @@ SELECT
     NULL AS unit_source_value,
     CAST(NULL AS VARCHAR(50)) AS qualifier_source_value,
     CAST(NULL AS VARCHAR(50)) AS value_source_value,
-    NULL AS observation_event_id,
-    NULL AS obs_event_field_concept_id
+    CAST(NULL AS INTEGER) AS observation_event_id,
+    CAST(NULL AS INTEGER) AS obs_event_field_concept_id
 FROM
     {{ ref('int__lk_observation_mapped') }} AS src
 INNER JOIN
