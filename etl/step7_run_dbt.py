@@ -34,10 +34,10 @@ def execute_dbt_build():
         print(f"[DBT STDERR]\n{result.stderr}")
 
     if result.returncode != 0:
-        print(f"[ERROR] dbt run failed with return code {result.returncode}")
+        print(f"[STEP 7: RUN DBT ]ERROR dbt run failed with return code {result.returncode}")
         sys.exit(result.returncode)
 
-    print("[SUCCESS] dbt run transformations completed.")
+    print("STEP 7: RUN DBT ]PASS dbt run transformations completed.")
     sys.exit(0)
 
 if __name__ == "__main__":

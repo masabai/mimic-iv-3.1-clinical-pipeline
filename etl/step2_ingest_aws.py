@@ -1,8 +1,8 @@
 import os
 import subprocess
 
-BASE_S3_PATH = "s3://arn:aws:s3:us-east-1:724665945834:accesspoint/mimiciv-v3-1-02/mimiciv/3.1/"
-LOCAL_DOWNLOAD_DIR = "/home/moesa/mimiciv_aws/"
+BASE_S3_PATH = os.environ["BASE_S3_PATH"]
+LOCAL_DOWNLOAD_DIR = os.environ.get("LOCAL_DOWNLOAD_DIR", "/data")
 
 def run_aws_s3_sync(s3_subpath, local_subpath, label):
     s3_path    = BASE_S3_PATH + s3_subpath
@@ -40,15 +40,26 @@ def run_aws_s3_sync(s3_subpath, local_subpath, label):
         process.wait()
 
         if process.returncode == 0:
-            print(f"\n✅ SUCCESS: {label} downloaded!")
+            print(f"\n [STEP 2: INGEST DATA FROM AWS] PASS SUCCESS: {label} downloaded!")
         else:
-            print(f"\n❌ FAILED: {label} — return code {process.returncode}")
+            print(f"\nFAILED: {label} — return code {process.returncode}")
 
     except Exception as e:
-        print(f"\n❌ ERROR: {e}")
+        print(f"\nERROR: {e}")
 
 # ── Run Downloads ──────────────────────────────────────────
 run_aws_s3_sync("hosp/", "hosp/", "MIMIC-IV hosp module")
 run_aws_s3_sync("icu/",  "icu/",  "MIMIC-IV icu module")
+
+# Download root-level manifest files (SHA256SUMS.txt etc.)
+print("\nDownloading root-level manifest files...")
+subprocess.run([
+    "aws", "s3", "sync",
+    BASE_S3_PATH, LOCAL_DOWNLOAD_DIR,
+    "--request-payer", "requester",
+    "--region", "us-east-1",
+    "--exclude", "*",
+    "--include", "SHA256SUMS.txt",
+], env=os.environ.copy())
 
 print("\n All downloads complete!")

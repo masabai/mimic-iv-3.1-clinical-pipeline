@@ -9,6 +9,8 @@ CSV_DIR = Path("/data")
 con = duckdb.connect(str(DB_PATH))
 
 # Memory tuning configs for your 16GB RAM laptop
+#5GB-2 threds :13 mins
+# To try with 8GB-4 threads
 con.execute("SET memory_limit = '5GB';") #6
 con.execute("SET threads = 2;")#4
 con.execute("SET temp_directory = '/duckdb/duckdb_temp';")
@@ -34,4 +36,4 @@ for csv_file in CSV_DIR.glob("**/*.csv.gz"):
         """)
 
 con.close()
-print(f"DuckDB database created at {DB_PATH} with all tables loaded.")
+print(f"[STEP 5: BUILD MIMIC DATA] DuckDB database created at {DB_PATH} with all tables loaded.")

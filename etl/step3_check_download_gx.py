@@ -152,7 +152,7 @@ if __name__ == "__main__":
         
         runtime = (time.time() - start_time) / 60
         print("\n==================================================================")
-        print(f"[SUCCESS] PRE-INGESTION CHECKS PASSED IN {runtime:.2f} MINUTES")
+        print(f"[STEP 3] PASS PRE-INGESTION CHECKS PASSED IN {runtime:.2f} MINUTES")
         print("Ready for Load step.")
         print("==================================================================")
         

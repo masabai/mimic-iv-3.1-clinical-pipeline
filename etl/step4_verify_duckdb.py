@@ -8,13 +8,18 @@ CSV_DIR = Path("/data")
 
 # 1. Hardcoded Athena tables (since they live inside the zip archive)
 ATHENA_TABLES = [
-    "athena.concept",
-    "athena.concept_class",
-    "athena.concept_relationship",
-    "athena.domain",
-    "athena.relationship",
-    "athena.vocabulary",
+    "athena.CONCEPT",
+    "athena.CONCEPT_CLASS",
+    "athena.CONCEPT_RELATIONSHIP",
+    "athena.DOMAIN",
+    "athena.RELATIONSHIP",
+    "athena.VOCABULARY",
+    "athena.CONCEPT_ANCESTOR",
+    "athena.CONCEPT_SYNONYM",
+    "athena.DRUG_STRENGTH",
+    "athena.custom_mappings"
 ]
+ 
 
 # 2. Dynamically scan 'hosp' and 'icu' subdirectories for MIMIC tables
 MIMIC_TABLES = []
@@ -59,11 +64,11 @@ def verify_duckdb():
 
         # CHANGE 2: An incomplete database returns False.
         if missing:
-            print(f"[STEP 5] FAIL — missing tables: {missing}")
+            print(f"[STEP 4:VERIFY DUCKDB] FAIL — missing tables: {missing}")
             return False
 
         print(
-            f"[STEP 5] PASS — "
+            f"[STEP 4: VERIFY DUCKDB] PASS — "
             f"all {len(EXPECTED_TABLES)} expected tables found"
         )
 
@@ -72,7 +77,7 @@ def verify_duckdb():
                 f"SELECT COUNT(*) FROM {table}"
             ).fetchone()[0]
 
-            print(f"[STEP 5] {table}: {count:,} rows")
+            print(f"[STEP 4:VERIFY DUCKDB] {table}: {count:,} rows")
 
         return True
 

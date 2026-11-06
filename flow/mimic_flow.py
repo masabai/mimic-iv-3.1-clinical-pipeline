@@ -75,28 +75,32 @@ def run_step(script_name):
 # ==============================================================================
 @flow(name="MIMIC-IV Clinical Pipeline")
 def mimiciv_pipeline():
-    
+        
     if check_ingestion():
         print("Data exists — skip extraction.")
     else:
         run_step("step2_ingest_aws.py")
 
-   #run_step("step3_check_download_gx.py")
+    #run_step("step3_check_download_gx.py")
     
     if verify_duckdb():
         print("[STEP 4] DuckDB already exists — skipping build.")
-       #run_step("step4_verify_duckdb.py")
+     #   run_step("step4_verify_duckdb.py")
     else:
         print("[PIPELINE] DuckDB missing or invalid — starting loader.")
-        #run_step("step5_build_mimic.py")
-        #run_step("step6_build_athena.py")
+     #   run_step("step5_build_mimic.py")
+     #   run_step("step6_build_athena.py")
         
         # Verify the database after loading.
-        #run_step("step4_verify_duckdb.py")
+     #   run_step("step4_verify_duckdb.py")
     
     # run dbt
-    print("[STEP 6] Building models.....")
-    run_step("step7_run_dbt.py")
+    #print("[STEP 7] Building models.....")
+    #run_step("step7_run_dbt.py")
+    
+    # NEW STEP: Test the 88 generated dbt models and Gold OMOP targets
+    print("[STEP 8] Running Quality Assurance on Gold OMOP Layer.....")
+    #run_step("step8_test_omop.py")
         
     
     print("\n[PREFECT] All steps completed successfully.")

@@ -42,6 +42,7 @@ sources:
     schema: athena
     tables:
       - name: CONCEPT
+      - name: CONCPET_CPT4
       - name: CONCEPT_ANCESTOR 
       - name: CONCEPT_CLASS
       - name: CONCEPT_RELATIONSHIP
@@ -51,5 +52,6 @@ sources:
       - name: RELATIONSHIP
       - name: VOCABULARY
       - name: custom_mappings
+      
 
   
