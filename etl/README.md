@@ -41,19 +41,33 @@ Requires `BASE_S3_PATH`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` in `.env`.
 
 > See `aws_physionet_setup.md` for the AWS + PhysioNet handshake setup.
 
-**⚠️ Strongly recommended over all other methods.** AWS CLI completes in ~2 minutes at full network speed with negligible cost (~$0.01), provided your IAM user is in `us-east-1` — the same region as the PhysioNet S3 bucket.
+**⚠️ Strongly recommended over all other methods.** AWS CLI completes in approximately 2 minutes at full network speed with negligible cost (around $0.01), provided your IAM user is in `us-east-1` — the same region as the PhysioNet S3 bucket.
 
 
 > **September 2026:** stable at 40–50 KB/s, ~21–22 hrs total.
 > **October 2026 onwards:** transfer rates dropped to 6–20 KB/s with frequent disconnects — 7+ days without completing. PhysioNet released several new datasets around this time which may have increased server load.
 
 
-**Alternative — manual browser download or wget:**
+**Alternative — wget (manual, no AWS required):**
+
+wget takes 20+ hrs at best. If your SSH session drops, the download dies. Use tmux to keep it alive across disconnects:
+
 ```bash
+# 1. Start a persistent tmux session
+tmux new -s mimic
+
+# 2. Run wget inside it
 wget -r -N -c -np --user <PhysioNet_username> --ask-password \
      -P ~/mimic/mimiciv_data/ \
      https://physionet.org/files/mimiciv/3.1/
+
+# 3. Detach safely (session keeps running): Ctrl+B then D
+# 4. Reattach later to check progress
+tmux attach -t mimic
 ```
+
+> `-N` skips already-downloaded files, `-c` resumes partial downloads — safe to re-run after a disconnect.
+
 ---
 
 ### `step3_check_download_gx.py`
