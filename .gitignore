@@ -22,7 +22,7 @@ dbt_project/profiles.yml
 .idea/
 archived/
 misc/*
-#data/*
+logs/*
 
 
 # OS

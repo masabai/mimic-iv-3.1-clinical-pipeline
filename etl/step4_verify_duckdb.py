@@ -21,7 +21,8 @@ ATHENA_TABLES = [
 ]
  
 
-# 2. Dynamically scan 'hosp' and 'icu' subdirectories for MIMIC tables
+# Dynamically scan 'hosp' and 'icu' subdirectories for MIMIC tables
+# (avoids hardcoding — picks up any new tables added in future MIMIC releases)
 MIMIC_TABLES = []
 for module in ["hosp", "icu"]:
     module_dir = CSV_DIR / module

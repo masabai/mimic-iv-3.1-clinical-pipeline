@@ -2,17 +2,28 @@
 
 All steps are orchestrated automatically by `flow/mimic_flow.py` via Prefect after `docker compose up`.
 
-> See `setup_linux.md` for pre-requisites before running `docker compose up --build`.
+> See `SETUP.md` for pre-requisites before running `docker compose up --build`.
 
 ---
 
 ## Pre-Docker Checklist
 
-# Requirement
-MIMIC-IV data (`hosp/`, `icu/`) +`SHA256SUMS.txt`  ===>  `~/mimic/mimiciv_data/` 
+| Requirement | Location |
+|---|---|
+| MIMIC-IV data (`hosp/`, `icu/`, `SHA256SUMS.txt`) | `~/mimic/mimiciv_data/` |
+| Athena vocabulary ZIP | `~/mimic/athena_vocab/` |
+| `.env` filled in | project root |
 
-Athena vocabulary ZIP =====> `~/mimic/athena_vocab/` 
-.env` filled in | project root |
+> Rename `.env.example` → `.env` and fill in the required values before starting.
+
+**Ingestion method:**
+- This pipeline uses **AWS CLI** (`step2_ingest_aws.py`) to pull MIMIC-IV from PhysioNet's S3 bucket. Requires `BASE_S3_PATH`, `AWS_ACCESS_KEY_ID`, and `AWS_SECRET_ACCESS_KEY` in `.env`.
+- If you are **NOT** using AWS CLI (e.g. manual download or wget), comment out the `step2_ingest_aws.py` call in `flow/mimic_flow.py` before running `docker compose up` — otherwise the pipeline will attempt an AWS download and fail.
+
+```python
+# flow/mimic_flow.py  — comment this out if not using AWS:
+# run_step("step2_ingest_aws.py")
+```
 
 ---
 
@@ -32,20 +43,21 @@ Requires `BASE_S3_PATH`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` in `.env`.
 
 **⚠️ Strongly recommended over all other methods.** AWS CLI completes in ~2 minutes at full network speed with negligible cost (~$0.01), provided your IAM user is in `us-east-1` — the same region as the PhysioNet S3 bucket.
 
+
+> **September 2026:** stable at 40–50 KB/s, ~21–22 hrs total.
+> **October 2026 onwards:** transfer rates dropped to 6–20 KB/s with frequent disconnects — 7+ days without completing. PhysioNet released several new datasets around this time which may have increased server load.
+
+
 **Alternative — manual browser download or wget:**
 ```bash
 wget -r -N -c -np --user <PhysioNet_username> --ask-password \
      -P ~/mimic/mimiciv_data/ \
      https://physionet.org/files/mimiciv/3.1/
 ```
-
-> Manual download or wget: ~21–22 hrs at 40–50 KB/s (PhysioNet transfer rate, September 2025).
-> wget can degrade to 6–20 KB/s during peak hours — observed to take 7+ days without completing.
-
 ---
 
 ### `step3_check_download_gx.py`
-Pre-ingestion smoke checks *(currently commented out in flow)*:
+Pre-ingestion smoke checks:
 1. File count — expects 22 `hosp` + 9 `icu` files
 2. SHA-256 hash verification against `SHA256SUMS.txt`
 3. Column header extraction — saves schema snapshot to `etl/validation/landing_zone_schema_snapshot.json`

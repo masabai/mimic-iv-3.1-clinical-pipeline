@@ -50,12 +50,12 @@ def load_csv_file(table_name, csv_path):
     print(f"LOADED: athena.{table_name} ({count:,} rows)")
 
 
-# STEP 1: Existing extracted CSV files
+# STEP 1: Load already-extracted CSV files directly from /athena
 for csv_file in CSV_DIR.rglob("*.csv"):
     load_csv_file(csv_file.stem, csv_file)
 
 
-# STEP 2: CSV files inside ZIP archives
+# STEP 2: Load CSV files packed inside ZIP archives (streams in 8MB chunks to avoid memory spikes)
 for zip_file in CSV_DIR.glob("*.zip"):
 
     print(f"\nScanning ZIP: {zip_file.name}")
@@ -93,7 +93,7 @@ for zip_file in CSV_DIR.glob("*.zip"):
                     load_csv_file(table_name, temp.name)
 
 
-# STEP 3: Custom mappings
+# STEP 3: Load any custom OMOP concept mappings
 con.execute("""
     CREATE TABLE IF NOT EXISTS athena.custom_mappings AS
     SELECT * FROM read_csv_auto('data/custom_mappings/*.csv');

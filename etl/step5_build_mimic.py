@@ -16,7 +16,7 @@ con.execute("SET threads = 2;")#4
 con.execute("SET temp_directory = '/duckdb/duckdb_temp';")
 con.execute("SET max_temp_directory_size = '60GB';")
 
-# Loop over all CSV.gz files
+# Recursively load all hosp/ and icu/ CSV.gz files into mimiciv schema
 for csv_file in CSV_DIR.glob("**/*.csv.gz"):
     print(csv_file)
     # Remove all extensions

@@ -79,6 +79,7 @@ def mimiciv_pipeline():
     if check_ingestion():
         print("Data exists — skip extraction.")
     else:
+        print("[PIPELINE] Data not found — starting AWS ingestion...")
         run_step("step2_ingest_aws.py")
 
     #run_step("step3_check_download_gx.py")
