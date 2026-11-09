@@ -34,7 +34,7 @@ services:
       - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
       - BASE_S3_PATH=${BASE_S3_PATH}
       - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}
-    # Hard limits configured perfectly for your 16GB RAM laptop
+    # Hard limits configured 16GB RAM laptop
     deploy:
       resources:
         limits:

@@ -103,6 +103,5 @@ Builds 88 models targeting the `dbt_project/` directory using the `dev` profile.
 ---
 
 ### `step8_test_omop.py`
-Runs post-transformation QA assertions from `etl/validation.sql` against the Gold OMOP layer.
-Checks row counts and vocabulary mapping failure rates.
-Exits with code `1` if any assertion fails.
+Runs post-transformation QA assertions from `etl/validation.sql` against the Gold OMOP layer. Checks relational data integrity, structural chronology, and vocabulary mapping failure rates. Exits with code 1 if any assertion fails.
+
