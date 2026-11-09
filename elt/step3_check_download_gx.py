@@ -1,3 +1,4 @@
+"""Step 3: Pre-ingestion smoke checks — validates file counts, SHA-256 hashes, and column schemas."""
 import os
 import sys
 import re
@@ -12,7 +13,7 @@ from concurrent.futures import ThreadPoolExecutor
 # CONFIGURATION — STRICT PRE-INGESTION SMOKE GATES
 # ==============================================================================
 LANDING_ZONE_DIR = Path("/data")
-LOGS_OUTPUT_DIR = Path("/app/etl/validation")
+LOGS_OUTPUT_DIR = Path("/app/elt/validation")
 LOGS_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 # Total expected file volume counts (including data tables)

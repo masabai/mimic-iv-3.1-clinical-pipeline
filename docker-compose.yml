@@ -29,6 +29,11 @@ services:
       - LOCAL_DOWNLOAD_DIR=/data
       - MIMIC_DB=/duckdb/mimic4.db
       - PREFECT_API_URL=http://prefect-server:4200/api
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+      - BASE_S3_PATH=${BASE_S3_PATH}
+      - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}
     # Hard limits configured perfectly for your 16GB RAM laptop
     deploy:
       resources:

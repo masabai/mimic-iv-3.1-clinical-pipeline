@@ -1,4 +1,4 @@
-
+"""Step 6: Loads Athena vocabulary CSVs and ZIPs from /athena into DuckDB under the athena schema."""
 import duckdb
 import zipfile
 import tempfile

@@ -27,7 +27,7 @@ clean-targets:         # directories to be removed by `dbt clean`
 
 models:
   dbt_project:
-     silver:
+    silver:
       +schema: silver
       +materialized: view
       # these are materialised as tables due to memory restrictions
@@ -42,6 +42,6 @@ models:
       admissions:
         int__lk_visit_clean:
           +materialized: table
-     gold:
+    gold:
       +schema: gold
       +materialized: table

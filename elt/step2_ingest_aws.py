@@ -1,3 +1,4 @@
+"""Step 2: Downloads MIMIC-IV hosp/, icu/, and SHA256SUMS.txt from PhysioNet S3 via AWS CLI."""
 import os
 import subprocess
 

@@ -1,4 +1,4 @@
-# ETL Pipeline — Step Reference
+# ELTPipeline — Step Reference
 
 All steps are orchestrated automatically by `flow/mimic_flow.py` via Prefect after `docker compose up`.
 

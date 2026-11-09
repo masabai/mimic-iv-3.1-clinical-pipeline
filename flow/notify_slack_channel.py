@@ -1,9 +1,14 @@
+"""Sends pipeline status notifications to a Slack channel via webhook.
+Webhook URL is read from the SLACK_WEBHOOK_URL environment variable.
+"""
+import os
 import urllib.request
 import json
 
-SLACK_WEBHOOK_URL = "https://hooks.slack.com/services/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"
+SLACK_WEBHOOK_URL = os.environ.get("SLACK_WEBHOOK_URL", "")
 
 def send_slack(message: str):
+    """Posts a message to the configured Slack webhook."""
     try:
         payload = json.dumps({"text": message}).encode()
         req = urllib.request.Request(
@@ -18,4 +23,5 @@ def send_slack(message: str):
 
 
 def on_task_failure(task, task_run, state):
+    """Prefect failure hook — fires a Slack alert when any pipeline task fails."""
     send_slack(f":red_circle: *MIMIC Pipeline — Task Failed*\n`{task.name}` failed\n{state.message or ''}")

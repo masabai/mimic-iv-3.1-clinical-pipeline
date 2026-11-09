@@ -1,3 +1,4 @@
+"""Step 1: Checks that MIMIC-IV hosp/ and icu/ data directories exist and are non-empty at /data."""
 from pathlib import Path
 
 

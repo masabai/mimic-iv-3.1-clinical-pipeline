@@ -1,4 +1,4 @@
-# etl/step6_run_dbt.py
+"""Step 7: Runs dbt to build all 88 Bronze → Silver → Gold OMOP models against DuckDB."""
 import subprocess
 import sys
 from pathlib import Path

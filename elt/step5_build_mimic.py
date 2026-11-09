@@ -1,7 +1,6 @@
+"""Step 5: Loads all MIMIC-IV CSV.gz files from /data into DuckDB under the mimiciv schema."""
 import duckdb
 from pathlib import Path
-
-# Paths
 DB_PATH = Path("/duckdb/mimic4.db")
 CSV_DIR = Path("/data")
 

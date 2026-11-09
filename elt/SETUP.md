@@ -75,7 +75,7 @@ Copy the `aws s3 cp` or `sync` command (it will contain the secure, hidden token
 
 ## STEP 5: Clone the repo & run
 ```bash
-git clone https://github.com/<your-github-username>/mimic-iv-3.1-clinical-pipeline.git
+git clone https://github.com/masabai/mimic-iv-3.1-clinical-pipeline.git
 cd mimic-iv-3.1-clinical-pipeline
 cp .env.example .env
 nano .env        # fill in AWS credentials — see VS Code tip below if you prefer a GUI editor

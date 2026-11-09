@@ -1,3 +1,4 @@
+"""Step 4: Verifies DuckDB contains all expected mimiciv and athena tables before running dbt."""
 import os
 import sys
 from pathlib import Path
