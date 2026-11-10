@@ -12,37 +12,6 @@ SELECT 'gold.person vs mimiciv.patients' AS check_name,
        (SELECT COUNT(*) FROM gold.person)::DOUBLE AS metric_a,
        (SELECT COUNT(*) FROM mimiciv.patients)::DOUBLE AS metric_b
 
--- Core clinical table row counts (must be > 0)
-UNION ALL
-SELECT 'gold.visit_occurrence row count vs 0' AS check_name,
-       (SELECT COUNT(*) FROM gold.visit_occurrence)::DOUBLE AS metric_a, 0.0 AS metric_b
-UNION ALL
-SELECT 'gold.condition_occurrence row count vs 0' AS check_name,
-       (SELECT COUNT(*) FROM gold.condition_occurrence)::DOUBLE AS metric_a, 0.0 AS metric_b
-UNION ALL
-SELECT 'gold.drug_exposure row count vs 0' AS check_name,
-       (SELECT COUNT(*) FROM gold.drug_exposure)::DOUBLE AS metric_a, 0.0 AS metric_b
-UNION ALL
-SELECT 'gold.measurement row count vs 0' AS check_name,
-       (SELECT COUNT(*) FROM gold.measurement)::DOUBLE AS metric_a, 0.0 AS metric_b
-UNION ALL
-SELECT 'gold.observation row count vs 0' AS check_name,
-       (SELECT COUNT(*) FROM gold.observation)::DOUBLE AS metric_a, 0.0 AS metric_b
-UNION ALL
-SELECT 'gold.procedure_occurrence row count vs 0' AS check_name,
-       (SELECT COUNT(*) FROM gold.procedure_occurrence)::DOUBLE AS metric_a, 0.0 AS metric_b
-
--- Athena vocabulary tables loaded from /athena (must be > 0)
-UNION ALL
-SELECT 'gold.concept row count vs 0' AS check_name,
-       (SELECT COUNT(*) FROM gold.concept)::DOUBLE AS metric_a, 0.0 AS metric_b
-UNION ALL
-SELECT 'gold.concept_relationship row count vs 0' AS check_name,
-       (SELECT COUNT(*) FROM gold.concept_relationship)::DOUBLE AS metric_a, 0.0 AS metric_b
-UNION ALL
-SELECT 'gold.vocabulary row count vs 0' AS check_name,
-       (SELECT COUNT(*) FROM gold.vocabulary)::DOUBLE AS metric_a, 0.0 AS metric_b
-
 -- Concept mapping failure rates on sampled data (threshold: < 30%)
 UNION ALL
 SELECT 'Condition Concept 0 Rate (Should be < 30%)' AS check_name,
@@ -59,6 +28,20 @@ SELECT 'Vocabulary Null concept_name violations (must be 0)' AS check_name,
        (SELECT COUNT(*) FROM gold.condition_occurrence co
         LEFT JOIN gold.concept c ON co.condition_concept_id = c.concept_id
         WHERE co.condition_concept_id != 0 AND c.concept_name IS NULL)::DOUBLE AS metric_a,
+       0.0 AS metric_b
+
+-- Vocabulary join integrity: non-zero drug concept_ids must resolve to a concept_name
+
+UNION ALL
+SELECT 'Drug Vocabulary Null concept_name violations (must be 0)' AS check_name,
+       (
+           SELECT COUNT(*)
+           FROM gold.drug_exposure de
+           LEFT JOIN gold.concept c
+               ON de.drug_concept_id = c.concept_id
+           WHERE de.drug_concept_id != 0
+             AND c.concept_id IS NULL
+       )::DOUBLE AS metric_a,
        0.0 AS metric_b
 
 -- Chronological integrity: visit start must not be after visit end

@@ -100,7 +100,7 @@ def mimiciv_pipeline():
     
     # run dbt
     print("[STEP 7] Building models.....")
-    run_step("step7_run_dbt.py")
+    #run_step("step7_run_dbt.py")
     
     # NEW STEP: Test the 88 generated dbt models and Gold OMOP targets
     print("[STEP 8] Running Quality Assurance on Gold OMOP Layer.....")

@@ -29,6 +29,4 @@ logs/*
 .DS_Store
 Thumbs.db
 
-
-echo "mimic-code/" >> .gitignore
-
+mimic-code/

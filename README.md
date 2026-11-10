@@ -8,9 +8,9 @@ A fully automated, Dockerised ELT pipeline that transforms raw MIMIC-IV clinical
 
 1. Checks if MIMIC-IV data already exists locally — skips download if so
 2. Optionally downloads MIMIC-IV from PhysioNet via AWS S3 (approximately 2 minutes)
-3. Loads all MIMIC-IV CSV.gz files into DuckDB under the `mimiciv` schema
-4. Loads OHDSI Athena vocabulary into DuckDB under the `athena` schema
-5. Runs 88 dbt models across Bronze → Silver → Gold OMOP layers (~50 mins)
+3. Loads all MIMIC-IV CSV.gz files into DuckDB under the `mimiciv` schema (approximately 13 minutes)
+4. Loads OHDSI Athena vocabulary into DuckDB under the `athena` schema ( approximately 50seconds)
+5. Runs 88 dbt models across Bronze → Silver → Gold OMOP layers (approximately 55-65 mins)
 6. Runs post-build QA assertions against the Gold OMOP layer
 7. Sends Slack notifications on success or failure
 
@@ -80,6 +80,7 @@ mimic-iv-3.1-clinical-pipeline/
 │   ├── step7_run_dbt.py
 │   ├── step8_test_omop.py
 │   ├── validation.sql          # Gold layer QA assertions
+│   ├── README.md               # Step reference and ingestion options
 │   ├── SETUP.md                # Full setup guide
 │   └── AWS_PHYSIONET_SETUP.md  # AWS + PhysioNet handshake guide
 ├── flow/
@@ -88,9 +89,12 @@ mimic-iv-3.1-clinical-pipeline/
 ├── dbt_project/                # dbt models (Bronze → Silver → Gold)
 │   └── models/
 ├── data/
-│   └── custom_mappings/        # 21 CogStack OMOP custom mapping CSVs
+│   ├── custom_mappings/        # 21 CogStack OMOP custom mapping CSVs
+│   └── README.md               # Custom mappings reference
 ├── docker-compose.yml
 ├── Dockerfile
+├── requirements.txt
+├── README.md
 └── .env.example
 ```
 
@@ -117,7 +121,7 @@ docker compose up
        ▼
 [Step 8] QA assertions on Gold OMOP layer
        ▼
-Slack notification — success or failure
+Slack notification — success or failure (skipped if SLACK_WEBHOOK_URL is not set)
 ```
 
 **Orchestration Lifecycle — Step Ownership**
@@ -162,7 +166,7 @@ Make sure `SHA256SUMS.txt` is included.
 | `AWS_SECRET_ACCESS_KEY` | IAM secret key |
 | `AWS_DEFAULT_REGION` | `us-east-1` |
 | `BASE_S3_PATH` | PhysioNet S3 access point URL |
-| `SLACK_WEBHOOK_URL` | Slack incoming webhook (optional) |
+| `SLACK_WEBHOOK_URL` | Slack incoming webhook (optional — leave blank to disable notifications) |
 
 ---
 
@@ -179,6 +183,7 @@ Make sure `SHA256SUMS.txt` is included.
 - [MIMIC-IV](https://physionet.org/content/mimiciv/3.1/)
 - [OHDSI Athena](https://athena.ohdsi.org)
 - [CogStack dbt_mimic_omop](https://github.com/CogStack/dbt_mimic_omop)
+  - 11 of 88 models failed on first run during development. Two issues were raised and fixed upstream — see [CogStack issues](https://github.com/CogStack/dbt_mimic_omop/issues/). These fixes are already applied in this pipeline.
 - [dbt-duckdb](https://github.com/duckdb/dbt-duckdb)
 
 ---
