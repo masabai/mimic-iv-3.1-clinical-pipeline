@@ -8,9 +8,9 @@ A fully automated, Dockerised ELT pipeline that transforms raw MIMIC-IV clinical
 
 1. Checks if MIMIC-IV data already exists locally — skips download if so
 2. Optionally downloads MIMIC-IV from PhysioNet via AWS S3 (approximately 2 minutes)
-3. Loads all MIMIC-IV CSV.gz files into DuckDB under the `mimiciv` schema (approximately 13 minutes)
+3. Loads all MIMIC-IV CSV.gz files into DuckDB under the `mimiciv` schema (approximately 10 minutes)
 4. Loads OHDSI Athena vocabulary into DuckDB under the `athena` schema ( approximately 50seconds)
-5. Runs 88 dbt models across Bronze → Silver → Gold OMOP layers (approximately 55-65 mins)
+5. Runs 88 dbt models across Bronze → Silver → Gold OMOP layers (approximately 36 mins)
 6. Runs post-build QA assertions against the Gold OMOP layer
 7. Sends Slack notifications on success or failure
 
@@ -201,3 +201,5 @@ This pipeline builds on the dbt MIMIC-IV OMOP work by CogStack. If you use this 
   year={2026}
 }
 ```
+
+

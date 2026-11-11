@@ -1,0 +1,13 @@
+dbt_project:
+  outputs:
+    dev:
+      type: duckdb
+      path: /duckdb/mimic4.db
+      threads: 1
+      settings:
+        memory_limit: '6GB' # 3GB for 8GB hardware
+        #temp_directory: '/duckdb/duckdb_temp' #Cannot switch temporary directory error if included
+        max_temp_directory_size: '150GB'
+        preserve_insertion_order: false
+  target: dev
+  
