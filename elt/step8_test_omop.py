@@ -14,7 +14,7 @@ def run_pipeline_validation_script():
     con = duckdb.connect(str(DB_PATH), read_only=True)
     
     try:
-        # Load your multi-statement SQL script text
+        # Load multi-statement SQL script text
         with open(SQL_SCRIPT_PATH, 'r') as file:
             raw_sql = file.read()
             
@@ -28,7 +28,7 @@ def run_pipeline_validation_script():
             val_str = f"{metric_a:,.2f}%" if "Rate" in label else f"{int(metric_a):,}"
             ref_str = f"{metric_b:,.2f}%" if "Rate" in label else f"{int(metric_b):,}"
             
-            # Adjusted padding from 45 to 55 so your long label names fit without wrapping text
+            # Adjusted padding for long label names fit without wrapping text
             print(f" Check: {label.ljust(55)} | Result: {val_str.rjust(10)} | Reference: {ref_str.rjust(10)}")
             
             # Violation counts must equal 0
