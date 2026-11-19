@@ -41,19 +41,28 @@ https://github.com/CogStack/dbt_mimic_omop/blob/main/README.md
 Clicking on **here** link will preselect all required vocabulary
 
 3. **Request and Build:** Click the download button, name your bundle (e.g., `mimic_pipeline_vocab`), and wait for Athena to process the compression package and wait for the email to access (this typically takes 10 to 15 minutes).
-4. **Stage into Linux/WSL Environment:** Once the download email arrives, download the bundle and retrieve the file from your local Windows machine and securely move it to your target pipeline directory:
-
+4. **Stage the vocabulary bundle:** Once the download email arrives, download the bundle and move it to the pipeline directory.
 
 ```bash
-# Create the local vocabulary landing pad
 mkdir -p ~/mimic/athena_vocab
-
-# Copy the zip archive from your Windows Downloads partition
-cp "/mnt/c/Users/<your_windows_user>/Downloads/vocabulary_download_v5_*.zip" ~/mimic/athena_vocab/
-
 ```
 
-**Automation Notice:** Unlike the MIMIC data ingestion scripts, the OHDSI Athena vocabulary download **cannot be automated** via `wget` or `aws cli` due to strict session-authentication and manual bundle-generation requirements on the Athena portal. 
+**Linux (native):**
+```bash
+cp ~/Downloads/vocabulary_download_v5_*.zip ~/mimic/athena_vocab/
+```
+
+**macOS:**
+```bash
+cp ~/Downloads/vocabulary_download_v5_*.zip ~/mimic/athena_vocab/
+```
+
+**Windows (WSL2):** Replace `<your_windows_user>` with your Windows username:
+```bash
+cp "/mnt/c/Users/<your_windows_user>/Downloads/vocabulary_download_v5_*.zip" ~/mimic/athena_vocab/
+```
+
+**Automation Notice:** Unlike the MIMIC data ingestion scripts, the OHDSI Athena vocabulary download **cannot be automated** due to strict session-authentication and manual bundle-generation requirements on the Athena portal. 
 
 
 ## STEP 4: MIMIC data
@@ -88,27 +97,15 @@ docker compose up --build
 
 ## Bonus: Edit Files with VS Code (instead of nano)
 
-If you are developing on Windows via WSL, using Visual Studio Code is a much friendlier way to view and edit `.env` files, Python scripts, or data configurations without touching `nano`.
+VS Code is a friendlier way to view and edit `.env` files, Python scripts, or data configurations.
 
-### 1. Install VS Code
-Download and install the Windows version from [code.visualstudio.com](https://code.visualstudio.com).
+Download and install from [code.visualstudio.com](https://code.visualstudio.com), then open your project:
 
-### 2. Install the WSL Extension
-Open VS Code, go to the Extensions view (`Ctrl+Shift+X`), search for **WSL**, and click **Install**.
+```bash
+cd mimic-iv-3.1-clinical-pipeline
+code .
+```
 
-### 3. Open Your Project in WSL
+**Windows (WSL2) only:** Install the [WSL extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-wsl) (`Ctrl+Shift+X` → search WSL). The first `code .` run will set up the VS Code server in WSL automatically. Alternatively, click the `><` icon in the bottom-left corner → **Connect to WSL** → **File → Open Folder**.
 
-* **Option A (From your WSL terminal - Fastest):**
-  Navigate to your pipeline directory and open it directly:
-  ```bash
-  cd mimic-iv-3.1-clinical-pipeline
-  code .
-  ```
-  *(Note: The first time you run this, WSL will quickly set up the VS Code server components automatically.)*
-
-* **Option B (From VS Code UI):**
-  1. Click the remote indicator button (the `><` icon) in the very bottom-left corner of VS Code.
-  2. Select **Connect to WSL**.
-  3. Go to **File → Open Folder** and navigate to your Linux project directory.
-
-* **Tip:** If you are using VS Code, you can select **Terminal → New Terminal** from the top menu to run your `docker compose` or `git` commands right inside the editor. This keeps your code view and your terminal window in a single screen.
+> **Tip:** Use **Terminal → New Terminal** inside VS Code to run `docker compose` commands without leaving the editor.

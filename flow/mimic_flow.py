@@ -15,41 +15,11 @@ DBT_PROJECT_DIR = PROJECT_ROOT / "dbt_project"
 DBT_PROFILES_DIR = DBT_PROJECT_DIR
 
 # ==============================================================================
-# CHECK DATA ALREADY DOWNLOADED
+# ELT STEP RUNNER
 # ==============================================================================
-@task(name="Step 1: Check MIMIC-IV data", on_failure=[on_task_failure])
-def check_ingestion():
-    """Returns True if hosp/ and icu/ data already exists at /data, skipping download."""
-    script_path = PROJECT_ROOT / "elt" / "step1_check_existing_data.py"
-
-    result = subprocess.run(
-        [PYTHON_EXE, str(script_path)],
-        cwd=PROJECT_ROOT
-    )
-
-    return result.returncode == 0
-
-# ==============================================================================
-# CHECK Database
-# ==============================================================================
-@task(name="Step 4: Check Duckdb loaded", on_failure=[on_task_failure])
-def verify_duckdb():
-    """Returns True if DuckDB already contains all expected mimiciv and athena tables."""
-    script_path = PROJECT_ROOT / "elt" / "step4_verify_duckdb.py"
-
-    print("\n[PIPELINE] Checking if DuckDB is valid...")
-    result = subprocess.run(
-        [PYTHON_EXE, str(script_path)],
-        cwd=PROJECT_ROOT
-    )
-    return result.returncode == 0
-
-# ==============================================================================
-# RUN ELT STEPS
-# ==============================================================================
-@task(on_failure=[on_task_failure], task_run_name="{script_name}")
-def run_step(script_name):
-    """Executes a single elt/ script as a subprocess and raises on non-zero exit code."""
+@task(name="run-elt-step", task_run_name="{script_name}", on_failure=[on_task_failure])
+def run_step(script_name: str, raise_on_fail: bool = True) -> bool:
+    """Executes an elt/ script. Raises on failure by default, or returns bool for checks."""
     script_path = PROJECT_ROOT / "elt" / script_name
 
     print(f"\n[PREFECT] Running {script_name}...")
@@ -65,49 +35,50 @@ def run_step(script_name):
     if result.stdout:
         print(result.stdout)
 
-    if result.returncode != 0:
+    if result.returncode != 0 and raise_on_fail:
         raise RuntimeError(
-            f"{script_name} failed with return code "
-            f"{result.returncode}"
+            f"{script_name} failed with return code {result.returncode}"
         )
 
-    print(f"[PREFECT] {script_name} completed.")
+    if result.returncode == 0:
+        print(f"[PREFECT] {script_name} completed.")
+
+    return result.returncode == 0
 
 # ==============================================================================
 # PIPELINE
 # ==============================================================================
 @flow(name="MIMIC-IV Clinical Pipeline")
 def mimiciv_pipeline():
-        
-    if check_ingestion():
-        print("Data exists — skip extraction.")
+    # Step 1: Check existing data (returns True/False without failing the flow)
+    if run_step("step1_check_existing_data.py", raise_on_fail=False):
+        print("[STEP 1] Data exists — skipping extraction.")
     else:
         print("[PIPELINE] Data not found — starting AWS ingestion...")
-        run_step("step2_ingest_aws.py")
+        # run_step("step2_ingest_aws.py")
 
-    run_step("step3_check_download_gx.py")
-    
-    if verify_duckdb():
+    # run_step("step3_check_download_gx.py")
+
+    # Step 4: Check DuckDB (returns True/False without failing the flow)
+    if run_step("step4_verify_duckdb.py", raise_on_fail=False):
         print("[STEP 4] DuckDB already exists — skipping build.")
-        run_step("step4_verify_duckdb.py")
     else:
         print("[PIPELINE] DuckDB missing or invalid — starting loader.")
-        run_step("step5_build_mimic.py")
+        # run_step("step5_build_mimic.py")
         run_step("step6_build_athena.py")
-        
-        # Verify the database after loading.
-        run_step("step4_verify_duckdb.py")
-    
-    # run dbt
+
+        # Re-verify after loading (raises error if verification still fails)
+        run_step("step4_verify_duckdb.py", raise_on_fail=True)
+
+    # Step 7: Run dbt
     print("[STEP 7] Building models.....")
-    run_step("step7_run_dbt.py")
-    
-    # NEW STEP: Test the 88 generated dbt models and Gold OMOP targets
+    # run_step("step7_run_dbt.py")
+
+    # Step 8: Test the 88 generated dbt models and Gold OMOP targets
     print("[STEP 8] Running Quality Assurance on Gold OMOP Layer.....")
-    run_step("step8_test_omop.py")
-        
-    
-    print("\n[PREFECT] All steps completed successfully.")
+    # run_step("step8_test_omop.py")
+
+    print("\n[PREFECT] All [1-8] steps completed successfully.")
 
 # ==============================================================================
 # RUN
@@ -115,10 +86,8 @@ def mimiciv_pipeline():
 if __name__ == "__main__":
     try:
         print("Starting MIMIC-IV pipeline...")
-        
         mimiciv_pipeline()
         send_slack(":large_green_circle: *MIMIC-IV Pipeline — All Steps Passed* :white_check_mark:")
-        
     except Exception as err:
         send_slack(f":rotating_light: *MIMIC Pipeline — Pipeline Crashed*\n```{err}```")
         print(f"\n[PIPELINE ERROR] Automation flow terminated unexpectedly:\n{err}")

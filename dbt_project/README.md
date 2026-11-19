@@ -6,7 +6,9 @@ This pipeline diverges from the default [CogStack profiles.yml](https://github.c
 
 ## WSL2 Memory Allocation
 
-Before running, configure WSL2 to give Docker enough headroom. Create or edit `~/.wslconfig` on Windows:
+Before running, configure WSL2 to give Docker enough headroom. Create or edit `~/.wslconfig` on Windows.
+
+> **Finding the file on Windows:** Open File Explorer, paste `%USERPROFILE%` into the address bar, and create `.wslconfig` there if it doesn't exist.
 
 ```ini
 # C:\Users\<your_windows_user>\.wslconfig
@@ -53,16 +55,3 @@ settings:
 
 > `temp_directory` is intentionally omitted — setting it after DuckDB has already used the default temp path causes a `Cannot switch temporary directory` error on re-runs.
 
-
-## 8GB Machine
-
-Reduce memory limit to `3GB` and keep threads at `1`:
-
-```yaml
-settings:
-  memory_limit: '3GB'
-  max_temp_directory_size: '150GB'
-  preserve_insertion_order: false
-```
-
-Runtime will be longer — expect 60–90 mins. Not tested extensively.

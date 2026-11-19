@@ -96,9 +96,10 @@ Also loads custom OMOP mappings from `data/custom_mappings/`.
 
 ---
 
-### `step7_run_dbt.py` (~50 mins)
+### `step7_run_dbt.py` (~36 mins)
 Runs dbt transformations across Bronze → Silver → Gold OMOP layers.
 Builds 88 models targeting the `dbt_project/` directory using the `dev` profile.
+Memory tuned for 16GB RAM: `6GB limit`, `1 threads`.
 
 ---
 

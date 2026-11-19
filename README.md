@@ -40,29 +40,25 @@ A fully automated, Dockerised ELT pipeline that transforms raw MIMIC-IV clinical
 
 ---
 
-## Quick Start
+## Getting Started
+
+This pipeline requires several prerequisites before `docker compose up` will work. Follow the setup guides in order:
+
+1. [`elt/SETUP.md`](elt/SETUP.md) — Install dependencies, configure WSL2 memory, download Athena vocabulary and MIMIC-IV data
+2. [`elt/AWS_PHYSIONET_SETUP.md`](elt/AWS_PHYSIONET_SETUP.md) — Link your AWS account to PhysioNet for fast S3 download (recommended)
+3. [`elt/README.md`](elt/README.md) — Step reference, ingestion options, and tmux workflow for wget
+
+Once all prerequisites are met:
 
 ```bash
 git clone https://github.com/masabai/mimic-iv-3.1-clinical-pipeline.git
 cd mimic-iv-3.1-clinical-pipeline
 cp .env.example .env
-# fill in .env with your AWS credentials and Slack webhook
+# fill in .env — see elt/SETUP.md
 docker compose up --build
 ```
 
 > Everything after `docker compose up` is fully automated by the pipeline.
-
----
-
-## Pre-Docker Checklist
-
-| Requirement | Location |
-|---|---|
-| MIMIC-IV data (`hosp/`, `icu/`, `SHA256SUMS.txt`) | `~/mimic/mimiciv_data/` |
-| Athena vocabulary ZIP | `~/mimic/athena_vocab/` |
-| `.env` filled in | project root |
-
-> Rename `.env.example` → `.env` before starting. See `elt/SETUP.md` for full setup instructions.
 
 ---
 

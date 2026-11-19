@@ -8,7 +8,7 @@ import json
 SLACK_WEBHOOK_URL = os.environ.get("SLACK_WEBHOOK_URL", "")
 
 def send_slack(message: str):
-    """Posts a message to the configured Slack webhook. Silently skips if URL is not set."""
+    """Posts a message to the configured Slack webhook. Skips if URL is not set."""
     if not SLACK_WEBHOOK_URL:
         print("[SLACK] No webhook URL configured — skipping notification.")
         return

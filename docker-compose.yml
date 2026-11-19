@@ -39,5 +39,5 @@ services:
       resources:
         limits:
           cpus: '4.0'
-          memory: 6656M #4096M for 8GB RAM
+          memory: 6656M
 

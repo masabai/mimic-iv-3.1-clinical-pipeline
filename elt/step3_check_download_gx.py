@@ -150,11 +150,8 @@ if __name__ == "__main__":
         verify_file_counts()          # Check 1: Volumetric File Count 
         verify_cryptographic_hashes()  # Check 2: File Content hash check
         verify_column_headers()        # Check 3: Extract Column Names & Counts
-        
-        runtime = (time.time() - start_time) / 60
         print("\n==================================================================")
-        print(f"[STEP 3] PASS PRE-INGESTION CHECKS PASSED IN {runtime:.2f} MINUTES")
-        print("Ready for Load step.")
+        print("[STEP 3] PASS PRE-INGESTION CHECKS PASSED - READY FOR LOAD STEP")
         print("==================================================================")
         
         sys.exit(0)  # <--- EXPLICITLY RETURN STATUS 0 (SUCCESS) TO PREFECT (for next step)

@@ -2,6 +2,7 @@
 import os
 import subprocess
 
+
 BASE_S3_PATH = os.environ["BASE_S3_PATH"]
 LOCAL_DOWNLOAD_DIR = os.environ.get("LOCAL_DOWNLOAD_DIR", "/data")
 

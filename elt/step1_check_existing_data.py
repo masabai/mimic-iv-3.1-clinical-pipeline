@@ -1,34 +1,34 @@
 """Step 1: Checks that MIMIC-IV hosp/ and icu/ data directories exist and are non-empty at /data."""
 from pathlib import Path
 
-
 # ==============================================================================
 # CONFIGURATION
 # ==============================================================================
 LOCAL_DOWNLOAD_DIR = Path("/data")   # mapped from /home/moesa/mimiciv_data in docker-compose
 
-
 # ==============================================================================
 # STEP 1 — CHECK DATA DIRECTORIES EXIST
 # ==============================================================================
-def check_ingestion():
+def check_ingestion() -> bool:
     hosp_path = LOCAL_DOWNLOAD_DIR / "hosp"
     icu_path  = LOCAL_DOWNLOAD_DIR / "icu"
 
-    hosp_ok = hosp_path.exists() and any(hosp_path.iterdir())
-    icu_ok  = icu_path.exists()  and any(icu_path.iterdir())
+    # 1. Check directories first (fail fast if either folder is missing)
+    if not (hosp_path.is_dir() and icu_path.is_dir()):
+        print("[STEP 1: CHECK EXISTING DATA] FAIL — hosp or icu directory missing")
+        return False
 
-    if hosp_ok and icu_ok:
+    # 2. Only scan files once if both directories exist
+    hosp_files = [f for f in hosp_path.glob("*.csv*") if f.stat().st_size > 0]
+    icu_files  = [f for f in icu_path.glob("*.csv*") if f.stat().st_size > 0]
+
+    if len(hosp_files) >= 22 and len(icu_files) >= 9:
         print(f"[STEP 1: CHECK EXISTING DATA] PASS — data found at {LOCAL_DOWNLOAD_DIR}")
-        print(f"[STEP 1] hosp: {hosp_path}")
-        print(f"[STEP 1] icu:  {icu_path}")
         return True
+    
 
-    print("[STEP 1: CHECK EXISTING DATA]  FAIL — hosp or icu directory missing or empty")
-    print(f"[STEP 1] Expected: {hosp_path}")
-    print(f"[STEP 1] Expected: {icu_path}")
+    print(f"[STEP 1: CHECK EXISTING DATA] FAIL — incomplete files (hosp: {len(hosp_files)}/22, icu: {len(icu_files)}/9)")
     return False
-
 
 if __name__ == "__main__":
     check_ingestion()
