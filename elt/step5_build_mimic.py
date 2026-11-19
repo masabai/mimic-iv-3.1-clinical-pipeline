@@ -10,8 +10,8 @@ con = duckdb.connect(str(DB_PATH))
 # Memory tuning configs for your 16GB RAM laptop
 #5GB-2 threds :13 mins
 # To try with 8GB-4 threads
-con.execute("SET memory_limit = '5GB';") #6
-con.execute("SET threads = 2;")#4
+con.execute("SET memory_limit = '5GB';") 
+con.execute("SET threads = 2;")
 con.execute("SET temp_directory = '/duckdb/duckdb_temp';")
 con.execute("SET max_temp_directory_size = '60GB';")
 

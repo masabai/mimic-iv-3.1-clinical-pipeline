@@ -124,17 +124,23 @@ Slack notification — success or failure (skipped if SLACK_WEBHOOK_URL is not s
 
 ```
 MIMIC-IV Orchestration Lifecycle
-├── [MY SYSTEM] Step 1: State Inspection (Local File Scan)
-├── [MY SYSTEM] Step 2: High-Performance AWS Cloud Ingestion
-├── [MY SYSTEM] Step 3: Pre-Ingestion Data Quality Smoke Tests
-├── [MY SYSTEM] Step 4: Database State & Table Volume Inspector
-├── [COGSTACK]  Step 5: Raw MIMIC-IV Relational DB Loader
-├── [COGSTACK]  Step 6: OHDSI Athena Vocabulary Catalog Sync
-├── [COGSTACK]  Step 7: 88-Model dbt Bronze → Silver → Gold Transformations
-└── [MY SYSTEM] Step 8: Post-Build Relational Quality Assertions
+├── [MY SYSTEM]             Step 1: State Inspection (Local File Scan)
+├── [MY SYSTEM]             Step 2: High-Performance AWS Cloud Ingestion
+├── [MY SYSTEM]             Step 3: Pre-Ingestion Data Quality Smoke Tests
+├── [MY SYSTEM]             Step 4: Database State & Table Volume Inspector
+├── [COGSTACK — MODIFIED]   Step 5: Raw MIMIC-IV Relational DB Loader
+├── [COGSTACK — MODIFIED]   Step 6: OHDSI Athena Vocabulary Catalog Sync
+├── [COGSTACK — PATCHED]    Step 7: 88-Model dbt Bronze → Silver → Gold Transformations
+└── [MY SYSTEM]             Step 8: Post-Build Relational Quality Assertions
 ```
 
-> Steps 5, 6, and 7 are based on the [CogStack dbt_mimic_omop](https://github.com/CogStack/dbt_mimic_omop) project. Steps 1, 2, 3, 4, and 8 are original work.
+> Steps 1, 2, 3, 4, and 8 are original work.
+>
+> Step 5 is derived from CogStack's [`load_mimic_to_duckdb.py`](https://github.com/CogStack/dbt_mimic_omop/blob/main/load_mimic_to_duckdb.py) — modified to add a DB config section and restructure the loader.
+>
+> Step 6 is derived from CogStack's [`load_vocabularies_to_duckdb.py`](https://github.com/CogStack/dbt_mimic_omop/blob/main/load_vocabularies_to_duckdb.py) — modified with additional fixes.
+>
+> Step 7 uses the CogStack dbt models with upstream bug fixes applied — 2 issues were raised and resolved. See [CogStack issues](https://github.com/CogStack/dbt_mimic_omop/issues/).
 
 ---
 
