@@ -138,7 +138,7 @@ MIMIC-IV Orchestration Lifecycle
 >
 > Step 5 is derived from CogStack's [`load_mimic_to_duckdb.py`](https://github.com/CogStack/dbt_mimic_omop/blob/main/load_mimic_to_duckdb.py) — modified to add a DB config section and restructure the loader.
 >
-> Step 6 is derived from CogStack's [`load_vocabularies_to_duckdb.py`](https://github.com/CogStack/dbt_mimic_omop/blob/main/load_vocabularies_to_duckdb.py) — modified with additional fixes.
+> Step 6 is derived from CogStack's [`load_vocabularies_to_duckdb.py`](https://github.com/CogStack/dbt_mimic_omop/blob/main/load_vocabularies_to_duckdb.py) — modified to add a pre-check before loading.
 >
 > Step 7 uses the CogStack dbt models with upstream bug fixes applied — 2 issues were raised and resolved. See [CogStack issues](https://github.com/CogStack/dbt_mimic_omop/issues/).
 
