@@ -57,14 +57,14 @@ def mimiciv_pipeline():
         print("[PIPELINE] Data not found — starting AWS ingestion...")
         # run_step("step2_ingest_aws.py")
 
-    # run_step("step3_check_download_gx.py")
+        run_step("step3_check_download_gx.py")
 
     # Step 4: Check DuckDB (returns True/False without failing the flow)
     if run_step("step4_verify_duckdb.py", raise_on_fail=False):
         print("[STEP 4] DuckDB already exists — skipping build.")
     else:
         print("[PIPELINE] DuckDB missing or invalid — starting loader.")
-        # run_step("step5_build_mimic.py")
+        run_step("step5_build_mimic.py")
         run_step("step6_build_athena.py")
 
         # Re-verify after loading (raises error if verification still fails)
@@ -76,7 +76,7 @@ def mimiciv_pipeline():
 
     # Step 8: Test the 88 generated dbt models and Gold OMOP targets
     print("[STEP 8] Running Quality Assurance on Gold OMOP Layer.....")
-    # run_step("step8_test_omop.py")
+    run_step("step8_test_omop.py")
 
     print("\n[PREFECT] All [1-8] steps completed successfully.")
 

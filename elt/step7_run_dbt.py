@@ -10,18 +10,20 @@ DBT_PROJECT_DIR = PROJECT_ROOT / "dbt_project"     # /app/dbt_project
 def execute_dbt_build():
     print(f"\n[PREFECT] Target Project Directory: {DBT_PROJECT_DIR}")
     print("[PREFECT] Running dbt build transforms...")
+    
+    dbt_command = [
+        sys.executable,
+        "-m",
+        "dbt.cli.main",
+        "run",
+        "--project-dir", str(DBT_PROJECT_DIR),
+        "--profiles-dir", str(DBT_PROJECT_DIR),
+        "--target", "dev",
+    ]
 
     # Run with text=True and capture output to force errors into the main terminal logs
     result = subprocess.run(
-        [
-            sys.executable,
-            "-m",
-            "dbt.cli.main",
-            "run",
-            "--project-dir", str(DBT_PROJECT_DIR),
-            "--profiles-dir", str(DBT_PROJECT_DIR),
-            "--target", "dev",
-        ],
+        dbt_command,
         cwd=str(PROJECT_ROOT),
         capture_output=True,
         text=True
@@ -37,7 +39,7 @@ def execute_dbt_build():
         print(f"[STEP 7: RUN DBT ]ERROR dbt run failed with return code {result.returncode}")
         sys.exit(result.returncode)
 
-    print("STEP 7: RUN DBT ]PASS dbt run transformations completed.")
+    print("[STEP 7: RUN DBT] PASS dbt run transformations completed.")
     sys.exit(0)
 
 if __name__ == "__main__":
