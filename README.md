@@ -31,7 +31,7 @@ A fully automated, Dockerised ELT pipeline that transforms raw MIMIC-IV clinical
 
 ## Requirements
 
-- 16GB RAM, 200GB+ free disk
+- 16GB RAM, 200GB+ free disk(~90GB for the data and database, plus ~110GB of breathing room for temp files and Docker during builds)
 - Ubuntu / WSL2 on Windows
 - Docker + Docker Compose
 - PhysioNet credentialled access to MIMIC-IV
