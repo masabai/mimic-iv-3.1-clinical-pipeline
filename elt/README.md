@@ -70,7 +70,7 @@ tmux attach -t mimic
 
 ---
 
-### `step3_check_download_gx.py`
+### `step3_check_download.py`
 Pre-ingestion smoke checks:
 1. File count — expects 22 `hosp` + 9 `icu` files
 2. SHA-256 hash verification against `SHA256SUMS.txt`

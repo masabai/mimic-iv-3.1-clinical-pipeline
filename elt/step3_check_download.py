@@ -39,7 +39,7 @@ def verify_file_counts():
         
         if len(found_files) != expected:
             raise ValueError(f"[FAIL] Incomplete download in '{module}'. Expected {expected}, got {len(found_files)}.")
-    print("[PASS] File inventory counts match production release layouts.")
+    print("[PASS] File counts match.")
 
 
 # ==============================================================================
@@ -50,16 +50,18 @@ def parse_sha256_manifest():
     manifest_file = LANDING_ZONE_DIR / "SHA256SUMS.txt"
     if not manifest_file.exists():
         print(f"[WARN] Manifest SHA256SUMS.txt missing in {LANDING_ZONE_DIR}. Skipping hash checks.")
-        return {}
+        return {} #avoids crashing if the file is missing
         
     hash_map = {}
-    pattern = re.compile(r"^([a-fA-A0-9]{64})\s+(.+)$")
+    # example => 5ec6c252aae1f035de05c2053ad1279a138ee00d22d1569a712a1df7e31371c2 icu/procedureevents.csv.gz
+    # \s+ -> 1 or more space, (.+)-> remaining file path, ^ -> start, $ -> end
+    pattern = re.compile(r"^([a-fA-F0-9]{64})\s+(.+)$")
     with open(manifest_file, "r", encoding="utf-8") as f:
         for line in f:
             match = pattern.match(line.strip())
             if match:
                 sha_val, relative_path = match.groups()
-                clean_rel_path = Path(relative_path.replace("/", os.sep))
+                clean_rel_path = Path(relative_path.replace("/", os.sep))# makes the file path compatible with os
                 hash_map[clean_rel_path] = sha_val
     return hash_map
 
@@ -71,7 +73,7 @@ def stream_verify_file_hash(args):
     
     try:
         with open(file_path, "rb") as f:
-            for byte_block in iter(lambda: f.read(8192 * 1024), b""):
+            for byte_block in iter(lambda: f.read(8192 * 1024), b""): #b"" -> empty byte string - no more bytes to read
                 sha256_engine.update(byte_block)
         
         if sha256_engine.hexdigest() == expected_hash:
@@ -142,12 +144,12 @@ def verify_column_headers():
     output_log = LOGS_OUTPUT_DIR / f"landing_zone_schema_snapshot.json"
     with open(output_log, "w", encoding="utf-8") as f:
         json.dump(schema_catalog, f, indent=2)
-    print(f"[PASS] Complete column catalog layout saved cleanly to: {output_log.name}")
+    print(f"[PASS] Complete column catalog layout saved to: {output_log.name}")
 
 if __name__ == "__main__":
     start_time = time.time()
     try:
-        verify_file_counts()          # Check 1: Volumetric File Count 
+        verify_file_counts()           # Check 1: Volumetric File Count 
         verify_cryptographic_hashes()  # Check 2: File Content hash check
         verify_column_headers()        # Check 3: Extract Column Names & Counts
         print("\n==================================================================")

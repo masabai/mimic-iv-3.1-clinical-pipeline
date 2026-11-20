@@ -57,7 +57,7 @@ def mimiciv_pipeline():
         print("[PIPELINE] Data not found — starting AWS ingestion...")
         # run_step("step2_ingest_aws.py")
 
-        run_step("step3_check_download_gx.py")
+    run_step("step3_check_download.py")
 
     # Step 4: Check DuckDB (returns True/False without failing the flow)
     if run_step("step4_verify_duckdb.py", raise_on_fail=False):

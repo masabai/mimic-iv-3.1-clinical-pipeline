@@ -69,7 +69,7 @@ mimic-iv-3.1-clinical-pipeline/
 ├── elt/                        # Pipeline steps (step1–step8)
 │   ├── step1_check_existing_data.py
 │   ├── step2_ingest_aws.py
-│   ├── step3_check_download_gx.py
+│   ├── step3_check_download.py
 │   ├── step4_verify_duckdb.py
 │   ├── step5_build_mimic.py
 │   ├── step6_build_athena.py
