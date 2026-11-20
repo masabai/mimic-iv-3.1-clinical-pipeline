@@ -47,12 +47,7 @@ Clicking on **here** link will preselect all required vocabulary
 mkdir -p ~/mimic/athena_vocab
 ```
 
-**Linux (native):**
-```bash
-cp ~/Downloads/vocabulary_download_v5_*.zip ~/mimic/athena_vocab/
-```
-
-**macOS:**
+**Linux (native) / macOS::**
 ```bash
 cp ~/Downloads/vocabulary_download_v5_*.zip ~/mimic/athena_vocab/
 ```
