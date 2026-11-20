@@ -1,3 +1,8 @@
+
+> **Tip — Don't let the steps intimidate you!**  
+> While this checklist looks lengthy on paper, it is quick and straightforward in practice. As soon as you log into the **AWS Console**, you can open the built-in **Amazon Q** assistant (the chat icon on the right sidebar) and ask it to guide you step-by-step through creating an IAM user, generating access keys, or checking permissions.
+
+
 # AWS CLI + PhysioNet Handshake Setup
 
 To use `step2_ingest_aws.py`, you need an AWS account linked to your PhysioNet account.
