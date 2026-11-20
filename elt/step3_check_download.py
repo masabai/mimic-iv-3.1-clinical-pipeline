@@ -85,7 +85,6 @@ def stream_verify_file_hash(args):
         print(f"[HASH ERROR] Could not read file {file_path.name}: {e}")
         return False
 
-
 def verify_cryptographic_hashes():
     """Coordinates parallel worker threads to validate extraction signatures."""
     print("\n==================================================================")
@@ -110,7 +109,7 @@ def verify_cryptographic_hashes():
         raise ValueError("[FAIL] Extraction payload corrupted. Checksum gates blocked loading phase.")
     print("[PASS] All landing zone assets match official cryptographic keys.")
 
-
+    
 # ==============================================================================
 # 3: HEADER SCHEMA LOOKUP
 # ==============================================================================
