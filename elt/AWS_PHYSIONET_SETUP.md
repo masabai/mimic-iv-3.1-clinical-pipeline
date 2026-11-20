@@ -1,6 +1,6 @@
 
 # AWS CLI + PhysioNet Handshake Setup
-To use `step2_ingest_aws.py`, you need an AWS account linked to your PhysioNet account.
+To use `step2_ingest_aws.py`, you need an AWS account linked to your PhysioNet account. You can also check your exact AWS charges right away using the CLI command in the [Monitor Billing](#monitor-billing) section below.
 
 > [!CAUTION]
 > **Don't skip this for `wget` or manual browser downloads!**
@@ -103,6 +103,7 @@ BASE_S3_PATH=s3://arn:aws:s3:<region>:<account-id>:accesspoint/<accesspoint-name
 ```
 
 ---
+
 
 ## Monitor Billing
 
