@@ -72,10 +72,9 @@ ways to download
 1) **Manul download** from web browser and copy to linux cp /mnt/  to mimic/mimiciv_data
 Make sure `SHA256SUMS.txt` is included in the download (needed for hash verification).
 
-2) **Download using your terminal:** Copy the pre-made `wget` command from the PhysioNet page (your username is pre-filled). Paste it into a tmux session — see `etl/README.md` for the tmux workflow. wget takes 20+ hrs and will die if your session drops without tmux.
+2) **Download using your terminal:** Copy the pre-made `wget` command from the PhysioNet page (your username is pre-filled). Paste it into a tmux session — see [`elt/README.md`](elt/README.md) for the tmux workflow. wget takes 20+ hrs and will die if your session drops without tmux.
 
-3) **Download using AWS CLI:**  Refer to `elt/AWS_PHYSIONET_SETUP.md`
-Copy the `aws s3 cp` or `sync` command (it will contain the secure, hidden token link to the private PhysioNet S3 bucket). 
+3) **Download using AWS CLI:**  Refer to [`elt/AWS_PHYSIONET_SETUP.md`](elt/AWS_PHYSIONET_SETUP.md) Copy the `aws s3 cp` or `sync` command (it will contain the secure, hidden token link to the private PhysioNet S3 bucket). 
 
 ## STEP 5: Clone the repo & run
 ```bash
