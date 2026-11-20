@@ -1,11 +1,12 @@
 
-> **Tip — Don't let the steps intimidate you!**  
-> While this checklist looks lengthy on paper, it is quick and straightforward in practice. As soon as you log into the **AWS Console**, you can open the built-in **Amazon Q** assistant (the chat icon on the right sidebar) and ask it to guide you step-by-step through creating an IAM user, generating access keys, or checking permissions.
-
-
 # AWS CLI + PhysioNet Handshake Setup
-
 To use `step2_ingest_aws.py`, you need an AWS account linked to your PhysioNet account.
+
+> [!CAUTION]
+> **Don't skip this for `wget` or manual browser downloads!**
+> * **Speed & Cost:** PhysioNet's direct download servers are extremely slow (`wget` can take **7+ days** and still not finish). Setting up AWS takes **~10 minutes** once, and then the entire dataset downloads in **~2 minutes for ~$0.01**.
+> * **Easy Setup with AI:** Don't let the length of this guide intimidate you. As soon as you log into the **AWS Console**, click the **Amazon Q** icon on the right sidebar—it will walk you through creating your IAM user and keys step by step.
+
 
 ---
 
