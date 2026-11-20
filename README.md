@@ -1,6 +1,6 @@
 # MIMIC-IV 3.1 Clinical Pipeline
 
-A fully automated, Dockerised ELT pipeline that transforms raw MIMIC-IV clinical data into a queryable OMOP CDM Gold layer using DuckDB and dbt. Processes 1.3 billion rows across MIMIC-IV and Athena vocabulary into a single 74GB DuckDB file on a 16GB RAM machine via DuckDB memory tuning.
+A fully automated, Dockerised ELT pipeline that transforms raw MIMIC-IV clinical data into an OMOP CDM Gold layer using DuckDB and dbt. Processes 1.3 billion rows across MIMIC-IV and Athena vocabulary into a single 74GB DuckDB file on a 16GB RAM machine via DuckDB memory tuning.
 
 ---
 
@@ -10,8 +10,8 @@ A fully automated, Dockerised ELT pipeline that transforms raw MIMIC-IV clinical
 2. Optionally downloads MIMIC-IV from PhysioNet via AWS S3 (approximately 2 minutes)
 3. Loads all MIMIC-IV CSV.gz files into DuckDB under the `mimiciv` schema (approximately 10 minutes)
 4. Loads OHDSI Athena vocabulary into DuckDB under the `athena` schema (approximately 50 seconds)
-5. Runs 88 dbt models across Bronze → Silver → Gold OMOP layers (approximately 36 mins)
-6. Runs post-build QA assertions against the Gold OMOP layer
+5. Runs 88 dbt models across Silver and Gold OMOP layers (approximately 36 mins)
+6. Validates Gold OMOP tables using automated SQL data quality checks
 7. Sends Slack notifications on success or failure
 
 ---
@@ -82,7 +82,7 @@ mimic-iv-3.1-clinical-pipeline/
 ├── flow/
 │   ├── mimic_flow.py           # Prefect orchestration flow
 │   └── notify_slack_channel.py # Slack notifications
-├── dbt_project/                # dbt models (Bronze → Silver → Gold)
+├── dbt_project/                # dbt models (Silver, Gold)
 │   └── models/
 ├── data/
 │   ├── custom_mappings/        # 21 CogStack OMOP custom mapping CSVs
@@ -113,9 +113,9 @@ docker compose up
        │ missing → [Step 5] Load MIMIC-IV CSV.gz → DuckDB mimiciv schema
        │           [Step 6] Load Athena vocab + custom mappings → athena schema
        ▼
-[Step 7] Run dbt — build 88 models across Bronze → Silver → Gold OMOP
+[Step 7] Run dbt — build 88 models across Silver and Gold OMOP
        ▼
-[Step 8] QA assertions on Gold OMOP layer
+[Step 8] Validate Gold OMOP layer
        ▼
 Slack notification — success or failure (skipped if SLACK_WEBHOOK_URL is not set)
 ```
@@ -127,10 +127,10 @@ MIMIC-IV Orchestration Lifecycle
 ├── [MY SYSTEM]             Step 1: State Inspection (Local File Scan)
 ├── [MY SYSTEM]             Step 2: High-Performance AWS Cloud Ingestion
 ├── [MY SYSTEM]             Step 3: Pre-Ingestion Data Quality Smoke Tests
-├── [MY SYSTEM]             Step 4: Database State & Table Volume Inspector
-├── [COGSTACK — MODIFIED]   Step 5: Raw MIMIC-IV Relational DB Loader
-├── [COGSTACK — MODIFIED]   Step 6: OHDSI Athena Vocabulary Catalog Sync
-├── [COGSTACK — PATCHED]    Step 7: 88-Model dbt Bronze → Silver → Gold Transformations
+├── [MY SYSTEM]             Step 4: Database State & Table Volume Check
+├── [COGSTACK — MODIFIED]   Step 5: Raw MIMIC-IV Schema Loader
+├── [COGSTACK — MODIFIED]   Step 6: OHDSI Athena Vocabulary Schema Loader
+├── [COGSTACK — PATCHED]    Step 7: 88-Model dbt Silver and Gold Transformations
 └── [MY SYSTEM]             Step 8: Post-Build Relational Quality Assertions
 ```
 
