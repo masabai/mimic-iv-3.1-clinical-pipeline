@@ -86,29 +86,50 @@ def stream_verify_file_hash(args):
         return False
 
 def verify_cryptographic_hashes():
-    """Coordinates parallel worker threads to validate extraction signatures."""
-    print("\n==================================================================")
+
     print("[SMOKE CHECK 2/3] RUNNING CRYPTOGRAPHIC MANIFEST CHECKS")
-    print("==================================================================")
-    
+
     manifest_map = parse_sha256_manifest()
+
+    # 1. Ensure manifest exists and contains valid entries
     if not manifest_map:
-        return
-        
+        raise ValueError(
+            "SHA256 manifest missing or contains no valid entries."
+        )
+
     tasks = []
+
+    # 2. Ensure every manifest file exists
     for rel_path, expected_hash in manifest_map.items():
+
         absolute_target = LANDING_ZONE_DIR / rel_path
+
         if absolute_target.exists():
             tasks.append((absolute_target, expected_hash))
-            
-    print(f"[SYSTEM] Dispatching {len(tasks)} parallel validation hash streams...")
-    with ThreadPoolExecutor(max_workers=4) as executor:
-        results = list(executor.map(stream_verify_file_hash, tasks))
-        
-    if not all(results):
-        raise ValueError("[FAIL] Extraction payload corrupted. Checksum gates blocked loading phase.")
-    print("[PASS] All landing zone assets match official cryptographic keys.")
 
+
+    # 3. Ensure there are files to validate
+    if not tasks:
+        raise ValueError("No files available for hash validation.")
+
+    print(f"[SYSTEM] Validating {len(tasks)} files...")
+
+    # 4. Run parallel SHA-256 validation
+    with ThreadPoolExecutor(max_workers=4) as executor:
+
+        results = list(
+            executor.map(stream_verify_file_hash, tasks)
+        )
+
+    # 5. Block ingestion if any file fails
+    failed_count = results.count(False)
+
+    if failed_count > 0:
+        raise ValueError(
+            f"Hash validation failed for {failed_count} files."
+        )
+
+    print("[PASS] All manifest-listed files passed SHA-256 validation.")
     
 # ==============================================================================
 # 3: HEADER SCHEMA LOOKUP
