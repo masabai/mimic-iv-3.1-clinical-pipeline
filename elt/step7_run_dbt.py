@@ -22,11 +22,12 @@ def execute_dbt_build():
     ]
 
     # Run with text=True and capture output to force errors into the main terminal logs
+    # Stream dbt output directly into the container logs
     result = subprocess.run(
         dbt_command,
         cwd=str(PROJECT_ROOT),
-        capture_output=True,
-        text=True
+        text=True,
+        check=False
     )
 
     # Print whatever dbt processed out to the console logs

@@ -2,6 +2,8 @@
 
 A fully automated, Dockerised ELT pipeline that transforms raw MIMIC-IV clinical data into an OMOP CDM Gold layer using DuckDB and dbt. Processes 1.3 billion rows across MIMIC-IV and Athena vocabulary into a single 74GB DuckDB file on a 16GB RAM machine via DuckDB memory tuning.
 
+> **Scope:** MIMIC-IV core modules only (hosp + icu). MIMIC-CXR (radiology images) and MIMIC-IV-Note (NLP/discharge summaries) are not included.
+
 ---
 
 ## What It Does
